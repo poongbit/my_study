@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <title>용휘의 다이어리</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 28.6px;
+        background-color: #ffffff;
+      }
+
+      .container {
+        max-width: 73rem;
+        margin: 0 auto;
+      }
+
+      .header {
+        margin-bottom: 1.875rem;
+      }
+
+      .menu {
+        display: flex;
+        gap: 10px;
+        /* 배너와의 간격 */
+        margin-top: 24px;
+      }
+
+      .active_menu {
+        color: black;
+        font-weight: bold;
+        border-bottom: 3px solid black;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+
+        /* 스크롤 시 달라붙는 모드 */
+        position: sticky;
+        backdrop-filter: blur(10px);
+      }
+
+      .category {
+        padding: 12px 16px 12px 16px;
+        border: 1px solid #dddddd;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+
+      .search {
+        padding: 12px 16px 12px 16px;
+        margin-left: 10px;
+        border: 1px solid #dddddd;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+
+      .write_diary {
+        display: flex;
+        padding: 12px 16px 12px 16px;
+        border: none;
+        border-radius: 8px;
+        background-color: #111111;
+        color: #ffffff;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .diary_area {
+        display: grid;
+        margin-top: 42px;
+
+        /* 너비 274px짜리 열 4개 생성 */
+        grid-template-columns: repeat(4, 274px);
+
+        /* 높이 296px짜리 행(row) 3개 생성 */
+        grid-template-rows: repeat(3, 296px);
+
+        /* 상하 간격  24px*/
+        gap: 24px;
+      }
+
+      .card {
+        width: 274px;
+        height: 296px;
+      }
+
+      .card_delete {
+        position: absolute;
+        top: -4px;
+        right: 4px;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+      }
+
+      .thumbnail_img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 16px;
+      }
+
+      .card_thumbnail {
+        display: flex;
+        position: relative;
+        justify-content: center;
+        font-size: 100px;
+        align-items: center;
+
+        height: 208px;
+        width: 274px;
+
+        border-radius: 16px;
+        margin-bottom: 16px;
+        object-fit: cover;
+      }
+
+      .card_lower {
+        display: flex;
+        justify-content: space-between;
+
+        font-size: 14px;
+
+        .tag {
+          color: pink;
+        }
+      }
+
+      .pagenation {
+        display: flex;
+        justify-content: center;
+        padding: 24px 0;
+      }
+
+      .footer {
+        background-color: #f2f2f2;
+        margin-top: 40px;
+        padding: 30px 0;
+      }
+
+      .footer_content {
+        max-width: 1168px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+
+      .footer_content div {
+        color: #888888;
+        font-size: 14px;
+      }
+
+      .modal_overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        z-index: 100;
+      }
+
+      .modal {
+        width: 400px;
+        padding: 24px;
+        background: #ffffff;
+        border-radius: 16px;
+      }
+
+      .modal_title {
+        margin: 0 0 20px 0;
+        font-size: 18px;
+      }
+
+      .modal_field {
+        margin-bottom: 16px;
+      }
+
+      .modal_label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .modal_options {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 14px;
+      }
+
+      .mood_option {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+      }
+
+      .modal_input,
+      .modal_textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
+      .modal_textarea {
+        height: 80px;
+        resize: none;
+      }
+
+      .modal_actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 20px;
+      }
+
+      .modal_close_btn,
+      .modal_submit_btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .modal_close_btn {
+        background: #f2f2f2;
+      }
+
+      .modal_submit_btn {
+        background: #111111;
+        color: #ffffff;
+      }
+
+      .scroll_top_btn {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+
+        width: 3rem;
+        height: 3rem;
+        border: none;
+        border-radius: 50%;
+
+        background-color: #111111;
+        color: #ffffff;
+        font-size: 1.25rem;
+
+        cursor: pointer;
+        /* 모달(z-index:100) 보다는 낮게, 나머지 콘텐츠 보다는 위 */
+        z-index: 50;
+
+        /* 처음에는 숨기고, 스크롤 내려가야 나타남 */
+        display: flex;
+        /* 세로 중앙 */
+        align-items: center;
+        /* 가로 중앙 */
+        justify-content: center;
+
+        overflow: hidden;
+      }
+
+      /* ---------- 모바일 반응형 ------------- */
+
+      @media (max-width: 779px) {
+        body {
+          padding: 1rem;
+        }
+
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0.75rem;
+        }
+
+        .left_toolbar {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .write_diary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 779px) {
+        .diary_area {
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: none; /* 행 개수 고정 해제, 내용에 따라 자동 증가 */
+          gap: 1rem;
+        }
+
+        .card {
+          width: 100%; /* 274px 고정, 그리드 칸에 맞춰서 유동적으로 */
+          height: auto;
+        }
+
+        .card_thumbnail {
+          width: 100%;
+          /* 화면 폭에 비례한 높이, 정사각형에 가깝게 */
+          height: 40vw;
+          max-height: 200px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>용휘의 다이어리</h1>
+
+        <div class="banner">
+          <img src="../img/Rectangle 1.png" alt="" />
+        </div>
+      </div>
+
+      <div class="menu">
+        <div class="active_menu">일기보관함</div>
+
+        <div>사진보관함</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="left_toolbar">
+          <select class="category" id="category">
+            <option value="">전체</option>
+          </select>
+
+          <input
+            class="search"
+            type="text"
+            placeholder="검색어를 입력해주세요."
+          />
+        </div>
+        <button class="write_diary">+ 일기쓰기</button>
+      </div>
+
+      <div class="diary_area" id="diary_area">
+        <div class="card" id="card">
+          <div class="card_thumbnail">
+            <img src="../img/슬퍼요 (m).png" class="thumbnail_img" alt="🦭" />
+
+            <img
+              src="../img/close_outline_light_m.svg"
+              alt="x"
+              class="card_delete"
+            />
+          </div>
+
+          <div class="card_lower">
+            <span class="tag">슬퍼요</span>
+            <span class="date">2024.03.12</span>
+          </div>
+
+          <h3 class="card_title">카드 타이틀 영역</h3>
+        </div>
+      </div>
+
+      <div class="pagenation">
+        <div class="pagenumber">1</div>
+      </div>
+    </div>
+
+    <!-- 푸터 구역 -->
+
+    <div class="footer">
+      <div class="footer_content">
+        <h2 class="footer_title">용휘의 다이어리</h2>
+        <div>대표 : 김용휘</div>
+        <div>Copyright © 2024. {name} Co., Ltd</div>
+      </div>
+    </div>
+
+    <!-- 모달 구역 -->
+
+    <div class="modal_overlay" id="modal_overlay" style="display: none">
+      <div class="modal">
+        <h2 class="modal_title">일기 쓰기</h2>
+
+        <div class="modal_field">
+          <label class="modal_label">오늘 기분은 어떠셨나요?</label>
+
+          <div class="modal_options">
+            <label class="mood_option">
+              <input type="radio" name="mood" value="happy" checked />
+              행복해요
+            </label>
+
+            <label class="mood_option">
+              <input type="radio" name="mood" value="sad" />슬퍼요
+            </label>
+
+            <label class="mood_option">
+              <input type="radio" name="mood" value="surprised" />놀랐어요
+            </label>
+
+            <label class="mood_option">
+              <input type="radio" name="mood" value="angry" />화나요
+            </label>
+
+            <label class="mood_option">
+              <input type="radio" name="mood" value="etc" />기타
+            </label>
+          </div>
+        </div>
+
+        <div class="modal_field">
+          <label class="modal_label">제목</label>
+          <input
+            type="text"
+            id="title_input"
+            class="modal_input"
+            placeholder="제목을 입력해주세요."
+          />
+        </div>
+
+        <div class="modal_field">
+          <label class="modal_label">내용</label>
+          <textarea
+            id="content_input"
+            class="modal_textarea"
+            placeholder="내용을 입력해 주세요."
+          ></textarea>
+        </div>
+
+        <div class="modal_actions">
+          <button class="modal_close_btn" id="modal_close_btn">닫기</button>
+          <button class="modal_submit_btn" id="modal_submit_btn">
+            등록하기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button id="scroll_top_btn" class="scroll_top_btn">⬆️</button>
+
+    <script>
+      // ---------- 1. 모달 열기/닫기 ----------
+      const writeBtn = document.querySelector(".write_diary");
+      const overlay = document.getElementById("modal_overlay");
+      const closeBtn = document.getElementById("modal_close_btn");
+
+      writeBtn.addEventListener("click", () => {
+        overlay.style.display = "flex";
+      });
+
+      closeBtn.addEventListener("click", () => {
+        overlay.style.display = "none";
+      });
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          overlay.style.display = "none";
+        }
+      });
+
+      // ---------- 2. 무드별 이미지/색상 ----------
+
+      const MOOD_CONFIG = {
+        happy: {
+          label: "행복해요",
+          image: "../img/행복해요 (m).png",
+          color: "#ffd6e0",
+        },
+        sad: {
+          label: "슬퍼요",
+          image: "../img/슬퍼요 (m).png",
+          color: "#cdeaf9",
+        },
+        surprised: {
+          label: "놀랐어요",
+          image: "../img/놀랐어요 (m).png",
+          color: "#fdf1c7",
+        },
+        angry: {
+          label: "화나요",
+          image: "../img/화나요 (m).png",
+          color: "#e5e5e5",
+        },
+        etc: { label: "기타", image: "../img/기타 (m).png", color: "#e3d9f7" },
+      };
+
+      // ---------- 3. localStorage ----------
+      const STORAGE_KEY = "diaries";
+
+      function saveDiaries() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(diaries));
+      }
+
+      function loadDiaries() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : [];
+      }
+
+      // ---------- 4. 데이터 + 화면 그리기 ----------
+
+      let diaries = loadDiaries();
+
+      function render() {
+        const area = document.getElementById("diary_area");
+        area.innerHTML = diaries
+          .map((d) => {
+            const mood = MOOD_CONFIG[d.mood];
+            return `
+        <div class="card" data-diary-id="${d.id}">
+          <div class="card_thumbnail" style="background-color:${mood.color}">
+            <img src="${mood.image}" class="thumbnail_img" alt="${mood.label}" />
+            <img src="../img/close_outline_light_m.svg" alt="x" class="card_delete" />
+          </div>
+          <div class="card_lower">
+            <span class="tag" style="color:${mood.color}">${mood.label}</span>
+            <span class="date">${d.date}</span>
+          </div>
+          <h3 class="card_title">${d.title}</h3>
+        </div>
+      `;
+          })
+          .join("");
+      }
+
+      render(); // 최초 화면 그리기
+
+      // ---------- 5. 등록하기 ----------
+
+      function addDiary(mood, title, content) {
+        diaries.push({
+          id: Date.now(),
+          mood,
+          title,
+          content,
+          date: new Date().toLocaleDateString("ko-KR"),
+        });
+        saveDiaries();
+        render();
+      }
+
+      document
+        .getElementById("modal_submit_btn")
+        .addEventListener("click", () => {
+          const mood = document.querySelector(
+            'input[name="mood"]:checked',
+          )?.value;
+          const title = document.getElementById("title_input")?.value.trim();
+          const content = document.getElementById("content_input").value.trim();
+
+          if (!mood || !title) {
+            alert("기분과 제목은 필수에요!");
+            return;
+          }
+
+          addDiary(mood, title, content);
+
+          document.getElementById("title_input").value = "";
+          document.getElementById("content_input").value = "";
+          overlay.style.display = "none";
+        });
+
+      // ---------- 6. 삭제 ----------
+
+      function deleteDiary(id) {
+        diaries = diaries.filter((d) => d.id !== id);
+        saveDiaries();
+        render();
+      }
+
+      document.getElementById("diary_area").addEventListener("click", (e) => {
+        if (!e.target.classList.contains("card_delete")) return;
+        const card = e.target.closest(".card");
+        deleteDiary(Number(card.dataset.diaryId));
+      });
+
+      // ---------- 7. 맨 위로 버튼----------
+      const scrollTopBtn = document.getElementById("scroll_top_btn");
+
+      window.addEventListener("scroll", () => {
+        // 스크롤이 300px 넘어갈 때만 버튼을  보여줌
+
+        if (window.scrollY > 300) {
+          scrollTopBtn.style.display = "flex";
+        } else {
+          scrollTopBtn.style.display = "none";
+        }
+      });
+
+      scrollTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
+</html>
