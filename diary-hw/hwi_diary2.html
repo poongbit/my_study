@@ -23,6 +23,18 @@
         margin-bottom: 1.875rem;
       }
 
+      .banner {
+        margin-top: 20px;
+      }
+
+      .banner img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 16px;
+        object-fit: cover;
+      }
+
       .menu {
         display: flex;
         gap: 10px;
@@ -127,6 +139,97 @@
         display: flex;
         justify-content: center;
         padding: 24px 0;
+      }
+
+      /* ---------- 사진목록(강아지) ---------- */
+
+      .ratio_filter {
+        display: flex;
+        gap: 8px;
+        margin-top: 42px;
+      }
+
+      .ratio_btn {
+        padding: 10px 16px;
+        border: 1px solid #dddddd;
+        border-radius: 20px;
+        background: #ffffff;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .ratio_btn.active {
+        background: #111111;
+        color: #ffffff;
+        border-color: #111111;
+      }
+
+      .photo_grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      /* 필터 버튼에 따라 카드 비율만 바뀜 (재렌더링 없이 CSS로 처리) */
+      .photo_grid.ratio-1-1 .photo_card {
+        aspect-ratio: 1 / 1;
+      }
+
+      .photo_grid.ratio-4-3 .photo_card {
+        aspect-ratio: 4 / 3;
+      }
+
+      .photo_grid.ratio-3-4 .photo_card {
+        aspect-ratio: 3 / 4;
+      }
+
+      .photo_card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: linear-gradient(
+          90deg,
+          #eeeeee 25%,
+          #f5f5f5 50%,
+          #eeeeee 75%
+        );
+        background-size: 200% 100%;
+        animation: skeleton_loading 1.4s ease-in-out infinite;
+      }
+
+      /* 로딩 끝나면 스켈레톤 애니메이션 정지 */
+      .photo_card.loaded {
+        animation: none;
+        background: none;
+      }
+
+      .photo_card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* 강아지 사진 비율 제각각 -> 여백 없이 꽉 채워 자르기 */
+        display: block;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .photo_card img.loaded {
+        opacity: 1;
+      }
+
+      @keyframes skeleton_loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      @media (max-width: 779px) {
+        .photo_grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
 
       .footer {
@@ -359,34 +462,50 @@
         <h1>용휘의 다이어리</h1>
 
         <div class="banner">
-          <img src="../img/Rectangle 1.png" alt="" />
+          <img src="img/Rectangle 1.png" alt="배너 이미지" />
         </div>
       </div>
 
       <div class="menu">
-        <div class="active_menu">일기보관함</div>
-        <div>사진보관함</div>
-      </div>
-
-      <div class="toolbar">
-        <div class="left_toolbar">
-          <select class="category" id="category">
-            <option value="">전체</option>
-          </select>
-
-          <input
-            class="search"
-            type="text"
-            placeholder="검색어를 입력해주세요."
-          />
+        <div class="active_menu" id="menu_diary" data-menu="diary">
+          일기보관함
         </div>
-        <button class="write_diary" id="write_diary_btn">+ 일기쓰기</button>
+        <div id="menu_photo" data-menu="photo">사진보관함</div>
       </div>
 
-      <div class="diary_area" id="diary_area"></div>
+      <!-- ---------- 일기보관함 화면 ---------- -->
+      <div id="diary_page">
+        <div class="toolbar">
+          <div class="left_toolbar">
+            <select class="category" id="category">
+              <option value="">전체</option>
+            </select>
 
-      <div class="pagenation">
-        <div class="pagenumber">1</div>
+            <input
+              class="search"
+              type="text"
+              placeholder="검색어를 입력해주세요."
+            />
+          </div>
+          <button class="write_diary" id="write_diary_btn">+ 일기쓰기</button>
+        </div>
+
+        <div class="diary_area" id="diary_area"></div>
+
+        <div class="pagenation">
+          <div class="pagenumber">1</div>
+        </div>
+      </div>
+
+      <!-- ---------- 사진보관함 화면 (강아지 사진) ---------- -->
+      <div id="photo_page" style="display: none">
+        <div class="ratio_filter">
+          <button class="ratio_btn active" data-ratio="1-1">기본형 1:1</button>
+          <button class="ratio_btn" data-ratio="4-3">가로형 4:3</button>
+          <button class="ratio_btn" data-ratio="3-4">세로형 3:4</button>
+        </div>
+
+        <div class="photo_grid ratio-1-1" id="photo_grid"></div>
       </div>
     </div>
 
@@ -799,7 +918,118 @@
       });
 
       // =========================================================
-      // 7. 맨 위로 버튼
+      // 7. 일기보관함 / 사진보관함 탭 전환
+      // =========================================================
+
+      const menuDiary = document.getElementById("menu_diary");
+      const menuPhoto = document.getElementById("menu_photo");
+      const diaryPage = document.getElementById("diary_page");
+      const photoPage = document.getElementById("photo_page");
+
+      let dogPhotosLoaded = false; // 최초 1회만 fetch (탭 왔다갔다 할 때마다 다시 부르지 않도록)
+
+      function switchMenu(target) {
+        const isDiary = target === "diary";
+
+        menuDiary.classList.toggle("active_menu", isDiary);
+        menuPhoto.classList.toggle("active_menu", !isDiary);
+
+        diaryPage.style.display = isDiary ? "" : "none";
+        photoPage.style.display = isDiary ? "none" : "";
+
+        // 사진보관함 탭에 처음 들어올 때만 강아지 사진을 불러옴
+        if (!isDiary && !dogPhotosLoaded) {
+          dogPhotosLoaded = true;
+          renderPhotoGrid();
+        }
+      }
+
+      menuDiary.addEventListener("click", () => switchMenu("diary"));
+      menuPhoto.addEventListener("click", () => switchMenu("photo"));
+
+      // =========================================================
+      // 8. 사진보관함 - 강아지 사진 (fetch + 컴포넌트 + 스켈레톤 + 비율필터)
+      // =========================================================
+
+      const DOG_API_URL = "https://dog.ceo/api/breeds/image/random/10"; // 한 번에 10장
+
+      // ---- 8-1. fetch: 강아지 이미지 URL 10개 가져오기 ----
+      async function fetchDogImages(count = 10) {
+        try {
+          const res = await fetch(
+            `https://dog.ceo/api/breeds/image/random/${count}`,
+          );
+
+          // 엣지케이스: 네트워크는 됐지만 API가 200이 아닌 경우
+          if (!res.ok) throw new Error("dog api response not ok");
+
+          const data = await res.json();
+          return data.message; // 이미지 URL 배열
+        } catch (err) {
+          console.error("강아지 이미지 로드 실패:", err);
+          return []; // 엣지케이스: 실패해도 화면이 안 죽도록 빈 배열 반환
+        }
+      }
+
+      // ---- 8-2. 컴포넌트: 카드 하나 만들기 (재사용 가능한 단위) ----
+      function createPhotoCard(url) {
+        const card = document.createElement("div");
+        card.className = "photo_card";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "강아지 사진";
+
+        // 이미지 로드가 끝나면 스켈레톤 -> 실제 이미지로 전환
+        img.addEventListener("load", () => {
+          img.classList.add("loaded");
+          card.classList.add("loaded");
+        });
+
+        // 엣지케이스: 이미지 로드 자체가 실패하면 스켈레톤만 계속 도는 걸 방지
+        img.addEventListener("error", () => {
+          card.classList.add("loaded");
+          card.style.background = "#f2f2f2";
+        });
+
+        card.appendChild(img);
+        return card;
+      }
+
+      // ---- 8-3. 그리드 전체 그리기 ----
+      async function renderPhotoGrid() {
+        const grid = document.getElementById("photo_grid");
+        grid.innerHTML = "";
+
+        const urls = await fetchDogImages(10);
+
+        if (urls.length === 0) {
+          grid.innerHTML =
+            '<p style="grid-column: 1 / -1; text-align:center; color:#888;">사진을 불러오지 못했어요. 새로고침 해주세요.</p>';
+          return;
+        }
+
+        urls.forEach((url) => {
+          grid.appendChild(createPhotoCard(url));
+        });
+      }
+
+      // ---- 8-4. 비율 필터 버튼 ----
+      document.querySelectorAll(".ratio_btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".ratio_btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+
+          const grid = document.getElementById("photo_grid");
+          // 클래스만 교체 -> 이미지는 그대로 두고 CSS aspect-ratio만 바뀜 (재요청 없음)
+          grid.className = "photo_grid ratio-" + btn.dataset.ratio;
+        });
+      });
+
+      // =========================================================
+      // 9. 맨 위로 버튼
       // =========================================================
 
       const scrollTopBtn = document.getElementById("scroll_top_btn");
