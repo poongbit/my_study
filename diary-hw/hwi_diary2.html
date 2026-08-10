@@ -297,7 +297,9 @@
         font-size: 14px;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.3s ease, transform 0.3s ease;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
         z-index: 200; /* 모달보다 위 */
       }
 
@@ -487,12 +489,8 @@
           <button class="modal_secondary_btn" id="detail_close_btn">
             닫기
           </button>
-          <button class="modal_secondary_btn" id="detail_copy_btn">
-            복사
-          </button>
-          <button class="modal_danger_btn" id="detail_delete_btn">
-            삭제
-          </button>
+          <button class="modal_secondary_btn" id="detail_copy_btn">복사</button>
+          <button class="modal_danger_btn" id="detail_delete_btn">삭제</button>
         </div>
       </div>
     </div>
@@ -571,9 +569,7 @@
       const writeSubmitBtn = document.getElementById("write_submit_btn");
 
       const successOverlay = document.getElementById("success_overlay");
-      const successConfirmBtn = document.getElementById(
-        "success_confirm_btn",
-      );
+      const successConfirmBtn = document.getElementById("success_confirm_btn");
 
       const detailOverlay = document.getElementById("detail_overlay");
       const detailCloseBtn = document.getElementById("detail_close_btn");
@@ -602,25 +598,25 @@
       const MOOD_CONFIG = {
         happy: {
           label: "행복해요",
-          image: "../img/행복해요 (m).png",
+          image: "img/행복해요 (m).png",
           color: "#ffd6e0",
         },
         sad: {
           label: "슬퍼요",
-          image: "../img/슬퍼요 (m).png",
+          image: "img/슬퍼요 (m).png",
           color: "#cdeaf9",
         },
         surprised: {
           label: "놀랐어요",
-          image: "../img/놀랐어요 (m).png",
+          image: "img/놀랐어요 (m).png",
           color: "#fdf1c7",
         },
         angry: {
           label: "화나요",
-          image: "../img/화나요 (m).png",
+          image: "img/화나요 (m).png",
           color: "#e5e5e5",
         },
-        etc: { label: "기타", image: "../img/기타 (m).png", color: "#e3d9f7" },
+        etc: { label: "기타", image: "img/기타 (m).png", color: "#e3d9f7" },
       };
 
       // =========================================================
@@ -654,7 +650,7 @@
         <div class="card" data-diary-id="${d.id}">
           <div class="card_thumbnail" style="background-color:${mood.color}">
             <img src="${mood.image}" class="thumbnail_img" alt="${mood.label}" />
-            <img src="../img/close_outline_light_m.svg" alt="x" class="card_delete" />
+            <img src="img/close_outline_light_m.svg" alt="x" class="card_delete" />
           </div>
           <div class="card_lower">
             <span class="tag" style="color:${mood.color}">${mood.label}</span>
@@ -693,9 +689,7 @@
           'input[name="mood"]:checked',
         )?.value;
         const title = document.getElementById("title_input")?.value.trim();
-        const content = document
-          .getElementById("content_input")
-          .value.trim();
+        const content = document.getElementById("content_input").value.trim();
 
         // 엣지케이스: 필수값(기분/제목) 누락 시 등록 막기
         if (!mood || !title) {
