@@ -8,10 +8,36 @@
         box-sizing: border-box;
       }
 
+      /* ---------- 다크모드 색상 변수 ---------- */
+
+      :root {
+        --bg: #ffffff;
+        --text: #111111;
+        --muted-text: #888888;
+        --border: #dddddd;
+        --input-bg: #ffffff;
+        --surface-bg: #ffffff; /* 모달/카드 등 표면 배경 */
+        --muted-btn-bg: #f2f2f2;
+      }
+
+      body.dark {
+        --bg: #121212;
+        --text: #eeeeee;
+        --muted-text: #aaaaaa;
+        --border: #3a3a3a;
+        --input-bg: #2b2b2b;
+        --surface-bg: #1e1e1e;
+        --muted-btn-bg: #333333;
+      }
+
       body {
         margin: 0;
         padding: 28.6px;
-        background-color: #ffffff;
+        background-color: var(--bg);
+        color: var(--text);
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
       }
 
       .container {
@@ -21,6 +47,13 @@
 
       .header {
         margin-bottom: 1.875rem;
+      }
+
+      .header_top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
       }
 
       .banner {
@@ -42,9 +75,9 @@
       }
 
       .active_menu {
-        color: black;
+        color: var(--text);
         font-weight: bold;
-        border-bottom: 3px solid black;
+        border-bottom: 3px solid var(--text);
       }
 
       .toolbar {
@@ -57,18 +90,45 @@
       }
 
       .category {
-        padding: 12px 16px 12px 16px;
-        border: 1px solid #dddddd;
+        appearance: none; /* 브라우저 기본 화살표 제거 후 직접 그림 */
+        padding: 12px 36px 12px 16px;
+        border: 1px solid var(--border);
         border-radius: 10px;
         font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23555555' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      /* 다크모드에서는 화살표 색을 밝게 다시 그림 */
+      body.dark .category {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23cccccc' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      }
+
+      .category:hover {
+        border-color: #999999;
+      }
+
+      .category:focus {
+        outline: none;
+        border-color: var(--text);
+        box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.08);
       }
 
       .search {
         padding: 12px 16px 12px 16px;
         margin-left: 10px;
-        border: 1px solid #dddddd;
+        border: 1px solid var(--border);
         border-radius: 10px;
         font-size: 14px;
+        background-color: var(--input-bg);
+        color: var(--text);
       }
 
       .write_diary {
@@ -80,6 +140,12 @@
         color: #ffffff;
         font-size: 14px;
         cursor: pointer;
+      }
+
+      /* 다크모드에서는 검정 버튼이 배경에 묻히니 반전시켜 대비 확보 */
+      body.dark .write_diary {
+        background-color: #eeeeee;
+        color: #111111;
       }
 
       .diary_area {
@@ -151,9 +217,10 @@
 
       .ratio_btn {
         padding: 10px 16px;
-        border: 1px solid #dddddd;
+        border: 1px solid var(--border);
         border-radius: 20px;
-        background: #ffffff;
+        background: var(--surface-bg);
+        color: var(--text);
         font-size: 14px;
         cursor: pointer;
       }
@@ -162,6 +229,13 @@
         background: #111111;
         color: #ffffff;
         border-color: #111111;
+      }
+
+      /* 다크모드에서는 활성 버튼도 반전시켜 배경과 구분되게 */
+      body.dark .ratio_btn.active {
+        background: #eeeeee;
+        color: #111111;
+        border-color: #eeeeee;
       }
 
       .photo_grid {
@@ -217,6 +291,17 @@
         opacity: 1;
       }
 
+      /* 다크모드 스켈레톤은 더 짙은 회색 톤으로 */
+      body.dark .photo_card {
+        background: linear-gradient(
+          90deg,
+          #2a2a2a 25%,
+          #363636 50%,
+          #2a2a2a 75%
+        );
+        background-size: 200% 100%;
+      }
+
       @keyframes skeleton_loading {
         0% {
           background-position: 200% 0;
@@ -233,7 +318,7 @@
       }
 
       .footer {
-        background-color: #f2f2f2;
+        background-color: var(--surface-bg);
         margin-top: 40px;
         padding: 30px 0;
       }
@@ -245,7 +330,7 @@
       }
 
       .footer_content div {
-        color: #888888;
+        color: var(--muted-text);
         font-size: 14px;
       }
 
@@ -270,13 +355,65 @@
         width: 400px;
         max-width: 90vw;
         padding: 24px;
-        background: #ffffff;
+        background: var(--surface-bg);
+        color: var(--text);
         border-radius: 16px;
       }
 
       .modal_title {
         margin: 0 0 20px 0;
         font-size: 18px;
+      }
+
+      /* ---------- 다크모드 토글 스위치 ---------- */
+
+      .dark_toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted-text);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .dark_toggle input {
+        display: none;
+      }
+
+      .toggle_slider {
+        display: inline-block;
+        width: 40px;
+        height: 22px;
+        background: #dddddd;
+        border-radius: 11px;
+        position: relative;
+        transition: background 0.3s ease;
+      }
+
+      .toggle_slider::before {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #ffffff;
+        top: 3px;
+        left: 3px;
+        transition: left 0.3s ease;
+      }
+
+      .dark_toggle input:checked + .toggle_slider {
+        background: #555555;
+      }
+
+      .dark_toggle input:checked + .toggle_slider::before {
+        left: 21px;
+      }
+
+      /* 다크모드에서 라디오 버튼 체크 색이 잘 보이도록 */
+      body.dark input[type="radio"] {
+        accent-color: #eeeeee;
       }
 
       .modal_field {
@@ -307,10 +444,18 @@
       .modal_textarea {
         width: 100%;
         padding: 10px 12px;
-        border: 1px solid #dddddd;
+        border: 1px solid var(--border);
         border-radius: 8px;
         font-size: 14px;
         font-family: inherit;
+        background: var(--input-bg);
+        color: var(--text);
+      }
+
+      /* 다크모드 placeholder는 더 어둡게 눌러서 흐린 느낌 유지 */
+      body.dark .modal_input::placeholder,
+      body.dark .modal_textarea::placeholder {
+        color: #777777;
       }
 
       .modal_textarea {
@@ -338,12 +483,19 @@
 
       .modal_close_btn,
       .modal_secondary_btn {
-        background: #f2f2f2;
+        background: var(--muted-btn-bg);
+        color: var(--text);
       }
 
       .modal_submit_btn {
         background: #111111;
         color: #ffffff;
+      }
+
+      /* 다크모드에서는 검정 버튼이 배경에 묻히니 반전 */
+      body.dark .modal_submit_btn {
+        background: #eeeeee;
+        color: #111111;
       }
 
       .modal_danger_btn {
@@ -356,7 +508,7 @@
         white-space: pre-wrap;
         line-height: 1.6;
         font-size: 14px;
-        color: #333;
+        color: var(--text);
         min-height: 80px;
       }
 
@@ -459,7 +611,14 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>용휘의 다이어리</h1>
+        <div class="header_top">
+          <h1>용휘의 다이어리</h1>
+          <label class="dark_toggle">
+            다크모드
+            <input type="checkbox" id="dark_mode_toggle" />
+            <span class="toggle_slider"></span>
+          </label>
+        </div>
 
         <div class="banner">
           <img src="img/Rectangle 1.png" alt="배너 이미지" />
@@ -690,6 +849,10 @@
       const successOverlay = document.getElementById("success_overlay");
       const successConfirmBtn = document.getElementById("success_confirm_btn");
 
+      const darkModeToggle = document.getElementById("dark_mode_toggle");
+      const searchInput = document.querySelector(".search");
+      const categorySelect = document.getElementById("category");
+
       const detailOverlay = document.getElementById("detail_overlay");
       const detailCloseBtn = document.getElementById("detail_close_btn");
       const detailCopyBtn = document.getElementById("detail_copy_btn");
@@ -760,9 +923,35 @@
       let diaries = loadDiaries();
       let currentDetailId = null; // 상세/삭제 흐름에서 현재 대상 id
 
+      function getFilteredDiaries() {
+        const keyword = searchInput.value.trim().toLowerCase();
+        const category = categorySelect.value;
+
+        return diaries.filter((d) => {
+          // 제목/내용 둘 중 하나라도 검색어를 포함하면 매치
+          const matchesKeyword =
+            !keyword ||
+            d.title.toLowerCase().includes(keyword) ||
+            (d.content || "").toLowerCase().includes(keyword);
+
+          // 카테고리는 "전체"(빈 값)면 항상 매치
+          const matchesCategory = !category || d.mood === category;
+
+          return matchesKeyword && matchesCategory;
+        });
+      }
+
       function render() {
         const area = document.getElementById("diary_area");
-        area.innerHTML = diaries
+        const list = getFilteredDiaries(); // 검색/카테고리 상태를 항상 반영해서 그림
+
+        if (list.length === 0) {
+          area.innerHTML =
+            '<p style="grid-column: 1 / -1; text-align:center; color:#888;">검색 결과가 없어요.</p>';
+          return;
+        }
+
+        area.innerHTML = list
           .map((d) => {
             const mood = MOOD_CONFIG[d.mood];
             return `
@@ -785,11 +974,39 @@
       render(); // 최초 화면 그리기
 
       // =========================================================
+      // 4-1. 검색 디바운스 (700ms) — 엔터 없이도 자동 검색
+      // =========================================================
+
+      let searchTimer = null;
+
+      searchInput.addEventListener("input", () => {
+        clearTimeout(searchTimer); // 입력할 때마다 이전 타이머는 취소
+        searchTimer = setTimeout(() => {
+          render();
+        }, 700);
+      });
+
+      // 엣지케이스: 엔터를 누르면 700ms 기다리지 않고 즉시 반영
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          clearTimeout(searchTimer);
+          render();
+        }
+      });
+
+      categorySelect.addEventListener("change", render);
+
+      // =========================================================
       // 5. 일기 등록 (모달 → 등록 → 완료 중첩모달)
       // =========================================================
 
       writeBtn.addEventListener("click", () => openModal(writeOverlay));
       writeCloseBtn.addEventListener("click", () => closeModal(writeOverlay));
+
+      // ---- 다크모드 토글: 메인 화면 전체(body)에 .dark 클래스로 반영 ----
+      darkModeToggle.addEventListener("change", () => {
+        document.body.classList.toggle("dark", darkModeToggle.checked);
+      });
 
       function addDiary(mood, title, content) {
         diaries.push({
@@ -996,7 +1213,7 @@
         return card;
       }
 
-      // ---- 8-3. 그리드 전체 그리기 ----
+      // ---- 8-3. 그리드 전체 그리기 (최초 진입 시 1회) ----
       async function renderPhotoGrid() {
         const grid = document.getElementById("photo_grid");
         grid.innerHTML = "";
@@ -1013,6 +1230,56 @@
           grid.appendChild(createPhotoCard(url));
         });
       }
+
+      // ---- 8-5. 무한스크롤: 스크롤 70% 지점에서 10개씩 추가 로드 ----
+
+      let isPhotoLoading = false; // 요청 중복 방지 플래그
+
+      // 스크롤 시 window scroll 위치 기준으로 전체 문서 대비 몇 %를 봤는지 계산
+      function getScrollRatio() {
+        const scrollTop = window.scrollY;
+        const winHeight = window.innerHeight;
+        const docHeight = document.documentElement.scrollHeight;
+        return (scrollTop + winHeight) / docHeight;
+      }
+
+      // 기존 그리드를 지우지 않고 뒤에 이어붙이기만 함 (append)
+      async function loadMorePhotos() {
+        if (isPhotoLoading) return; // 이전 요청이 아직 진행 중이면 무시
+        isPhotoLoading = true;
+
+        const grid = document.getElementById("photo_grid");
+        const urls = await fetchDogImages(10);
+        urls.forEach((url) => {
+          grid.appendChild(createPhotoCard(url));
+        });
+
+        isPhotoLoading = false;
+      }
+
+      // 스로틀: 스크롤 이벤트가 아무리 자주 발생해도 700ms에 한 번만 실행
+      function throttle(fn, delay) {
+        let lastTime = 0;
+        return function (...args) {
+          const now = Date.now();
+          if (now - lastTime >= delay) {
+            lastTime = now;
+            fn.apply(this, args);
+          }
+        };
+      }
+
+      const throttledPhotoScroll = throttle(() => {
+        // 사진보관함 탭이 아닐 때는 무시 (일기목록 스크롤 중엔 동작하지 않도록)
+        if (photoPage.style.display === "none") return;
+
+        // 마지막(100%) 혹은 70% 지점 도달 시 추가 로드
+        if (getScrollRatio() >= 0.7) {
+          loadMorePhotos();
+        }
+      }, 700);
+
+      window.addEventListener("scroll", throttledPhotoScroll);
 
       // ---- 8-4. 비율 필터 버튼 ----
       document.querySelectorAll(".ratio_btn").forEach((btn) => {
