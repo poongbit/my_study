@@ -152,7 +152,9 @@
         display: grid;
         margin-top: 42px;
         grid-template-columns: repeat(4, 274px);
-        grid-template-rows: repeat(3, 296px);
+        /* 페이지네이션 대응: 마지막 페이지가 12개 미만일 때
+           고정 3행이면 빈 행이 남아 아래가 뻥 뚫리므로 auto-rows로 변경 */
+        grid-auto-rows: 296px;
         gap: 24px;
       }
 
@@ -201,10 +203,70 @@
         color: pink;
       }
 
+      /* ---------- 페이지네이션 ---------- */
+
+      .page_info {
+        margin-top: 32px;
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted-text);
+      }
+
       .pagenation {
         display: flex;
         justify-content: center;
-        padding: 24px 0;
+        align-items: center;
+        gap: 8px;
+        padding: 16px 0 24px 0;
+        flex-wrap: wrap;
+      }
+
+      .page_btn,
+      .page_nav {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-bg);
+        color: var(--text);
+        font-size: 14px;
+        cursor: pointer;
+        transition:
+          background-color 0.2s ease,
+          border-color 0.2s ease;
+      }
+
+      .page_btn:hover:not(.active),
+      .page_nav:hover:not(:disabled) {
+        border-color: var(--text);
+      }
+
+      .page_btn.active {
+        background: #111111;
+        color: #ffffff;
+        border-color: #111111;
+        font-weight: bold;
+        cursor: default;
+      }
+
+      /* 다크모드에서는 활성 버튼 반전 (다른 버튼들과 동일한 규칙) */
+      body.dark .page_btn.active {
+        background: #eeeeee;
+        color: #111111;
+        border-color: #eeeeee;
+      }
+
+      .page_nav:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      /* 키보드 접근성: 포커스 링 유지 */
+      .page_btn:focus-visible,
+      .page_nav:focus-visible {
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
       }
 
       /* ---------- 사진목록(강아지) ---------- */
@@ -590,7 +652,7 @@
       @media (max-width: 779px) {
         .diary_area {
           grid-template-columns: repeat(2, 1fr);
-          grid-template-rows: none;
+          grid-auto-rows: auto; /* 모바일은 카드 높이 auto라 행 높이도 풀어줌 */
           gap: 1rem;
         }
 
@@ -651,9 +713,8 @@
 
         <div class="diary_area" id="diary_area"></div>
 
-        <div class="pagenation">
-          <div class="pagenumber">1</div>
-        </div>
+        <div class="page_info" id="page_info"></div>
+        <div class="pagenation" id="pagination"></div>
       </div>
 
       <!-- ---------- 사진보관함 화면 (강아지 사진) ---------- -->
@@ -901,6 +962,15 @@
         etc: { label: "기타", image: "img/기타 (m).png", color: "#e3d9f7" },
       };
 
+      // 카테고리 셀렉트 옵션을 MOOD_CONFIG에서 자동 생성
+      // (기존에는 "전체" 하나뿐이라 기분별 필터가 동작할 수 없었음)
+      Object.entries(MOOD_CONFIG).forEach(([key, cfg]) => {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = cfg.label;
+        categorySelect.appendChild(opt);
+      });
+
       // =========================================================
       // 3. localStorage
       // =========================================================
@@ -941,17 +1011,49 @@
         });
       }
 
+      // ---- 페이지네이션 상태 ----
+      const PAGE_SIZE = 12; // 4열 x 3행 그리드와 동일하게
+      const PAGE_BLOCK = 5; // 하단에 한 번에 노출할 페이지 번호 개수 (1~5, 6~10 ...)
+      let currentPage = 1;
+
+      // 정렬까지 끝난 "현재 조건의 전체 목록"
+      function getVisibleDiaries() {
+        const list = getFilteredDiaries();
+        list.sort((a, b) => b.id - a.id); // 최신순 (등록순으로 보려면 이 줄 삭제)
+        return list;
+      }
+
+      function getTotalPages(total) {
+        return Math.max(1, Math.ceil(total / PAGE_SIZE));
+      }
+
       function render() {
         const area = document.getElementById("diary_area");
-        const list = getFilteredDiaries(); // 검색/카테고리 상태를 항상 반영해서 그림
+        const pagination = document.getElementById("pagination");
+        const pageInfo = document.getElementById("page_info");
+
+        const list = getVisibleDiaries(); // 검색/카테고리 상태를 항상 반영해서 그림
+        const totalPages = getTotalPages(list.length);
+
+        // 엣지케이스: 삭제/검색으로 총 페이지가 줄어 현재 페이지가 범위를 벗어난 경우 보정
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
 
         if (list.length === 0) {
           area.innerHTML =
             '<p style="grid-column: 1 / -1; text-align:center; color:#888;">검색 결과가 없어요.</p>';
+          pagination.innerHTML = ""; // 결과 0건이면 페이지 버튼/정보도 비움
+          pageInfo.textContent = "";
           return;
         }
 
-        area.innerHTML = list
+        // 현재 페이지 구간만 잘라서 렌더 (slice는 끝 인덱스가 넘쳐도 안전)
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const pageItems = list.slice(start, start + PAGE_SIZE);
+
+        pageInfo.textContent = `총 ${list.length}개 · ${currentPage}/${totalPages} 페이지`;
+
+        area.innerHTML = pageItems
           .map((d) => {
             const mood = MOOD_CONFIG[d.mood];
             return `
@@ -966,10 +1068,98 @@
           </div>
           <h3 class="card_title">${d.title}</h3>
         </div>
-      `;
+          `;
           })
           .join("");
+
+        renderPagination(totalPages);
       }
+
+      // ---- 하단 페이지 버튼 그리기 ----
+      function renderPagination(totalPages) {
+        const el = document.getElementById("pagination");
+
+        // 페이지가 1개면 굳이 버튼을 그리지 않음
+        if (totalPages <= 1) {
+          el.innerHTML = "";
+          return;
+        }
+
+        // 블록 계산: 현재 페이지가 속한 5칸 묶음의 시작/끝
+        const blockStart =
+          Math.floor((currentPage - 1) / PAGE_BLOCK) * PAGE_BLOCK + 1;
+        const blockEnd = Math.min(blockStart + PAGE_BLOCK - 1, totalPages);
+
+        let html = "";
+
+        html += `<button class="page_nav" data-page="1" aria-label="첫 페이지" ${
+          currentPage === 1 ? "disabled" : ""
+        }>&laquo;</button>`;
+        html += `<button class="page_nav" data-page="${
+          currentPage - 1
+        }" aria-label="이전 페이지" ${
+          currentPage === 1 ? "disabled" : ""
+        }>&lsaquo;</button>`;
+
+        for (let p = blockStart; p <= blockEnd; p++) {
+          html += `<button class="page_btn ${
+            p === currentPage ? "active" : ""
+          }" data-page="${p}">${p}</button>`;
+        }
+
+        html += `<button class="page_nav" data-page="${
+          currentPage + 1
+        }" aria-label="다음 페이지" ${
+          currentPage === totalPages ? "disabled" : ""
+        }>&rsaquo;</button>`;
+        html += `<button class="page_nav" data-page="${totalPages}" aria-label="마지막 페이지" ${
+          currentPage === totalPages ? "disabled" : ""
+        }>&raquo;</button>`;
+
+        el.innerHTML = html;
+      }
+
+      // ---- 페이지 이동 ----
+      function goToPage(page) {
+        const totalPages = getTotalPages(getVisibleDiaries().length);
+
+        // 엣지케이스: 범위 밖 / 같은 페이지 재클릭이면 아무 것도 하지 않음
+        if (page < 1 || page > totalPages || page === currentPage) return;
+
+        currentPage = page;
+        render();
+
+        // 페이지를 넘기면 목록 상단으로 (스크롤이 아래에 남아있는 문제 방지)
+        document
+          .getElementById("diary_page")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // 검색/카테고리처럼 "목록 자체가 바뀌는" 동작은 항상 1페이지로 리셋
+      function resetAndRender() {
+        currentPage = 1;
+        render();
+      }
+
+      // 버튼이 매번 새로 그려지므로 개별 바인딩 대신 이벤트 위임
+      document.getElementById("pagination").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-page]");
+        if (!btn || btn.disabled) return;
+        goToPage(Number(btn.dataset.page));
+      });
+
+      // 좌우 방향키로 페이지 이동 (입력창/모달/사진탭에서는 무시)
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        if (openModalStack.length > 0) return;
+        if (document.getElementById("photo_page").style.display !== "none")
+          return;
+
+        const tag = document.activeElement.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+        goToPage(currentPage + (e.key === "ArrowRight" ? 1 : -1));
+      });
 
       render(); // 최초 화면 그리기
 
@@ -982,7 +1172,7 @@
       searchInput.addEventListener("input", () => {
         clearTimeout(searchTimer); // 입력할 때마다 이전 타이머는 취소
         searchTimer = setTimeout(() => {
-          render();
+          resetAndRender(); // 검색 결과는 항상 1페이지부터
         }, 700);
       });
 
@@ -990,11 +1180,11 @@
       searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           clearTimeout(searchTimer);
-          render();
+          resetAndRender();
         }
       });
 
-      categorySelect.addEventListener("change", render);
+      categorySelect.addEventListener("change", resetAndRender);
 
       // =========================================================
       // 5. 일기 등록 (모달 → 등록 → 완료 중첩모달)
@@ -1017,6 +1207,7 @@
           date: new Date().toLocaleDateString("ko-KR"),
         });
         saveDiaries();
+        currentPage = 1; // 최신순이므로 새 일기는 1페이지에 있음
         render();
       }
 
