@@ -1,0 +1,1536 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>용휘의 운동일지</title>
+
+    <style>
+      /* 모든 요소의 크기를 계산하기 쉽게 만들어요. */
+      * {
+        box-sizing: border-box;
+      }
+
+      /* Gmarket Sans 폰트를 불러와요. */
+      @font-face {
+        font-family: "GmarketSans";
+        src: url("./fonts/GmarketSansTTFLight.ttf") format("truetype");
+        font-weight: 300;
+      }
+
+      @font-face {
+        font-family: "GmarketSans";
+        src: url("./fonts/GmarketSansTTFMedium.ttf") format("truetype");
+        font-weight: 500;
+      }
+
+      @font-face {
+        font-family: "GmarketSans";
+        src: url("./fonts/GmarketSansTTFBold.ttf") format("truetype");
+        font-weight: 700;
+      }
+
+      body {
+        margin: 0;
+        background-color: #f7f7f5;
+        color: #111111;
+        font-family: "GmarketSans", sans-serif;
+        font-weight: 500;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font-family: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .페이지 {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px 60px 20px;
+      }
+
+      /* 상단 제목과 다크모드 영역이에요. */
+      .상단 {
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .로고 {
+        font-size: 22px;
+        font-weight: bold;
+      }
+
+      .다크모드영역 {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 13px;
+      }
+
+      /* 다크모드 토글 스위치 디자인이에요. */
+      .다크모드체크 {
+        appearance: none;
+        width: 48px;
+        height: 28px;
+        margin: 0;
+        padding: 4px;
+        border: 0;
+        border-radius: 20px;
+        background-color: #dddddd;
+        cursor: pointer;
+      }
+
+      /* 스위치 안에 있는 흰색 동그라미예요. */
+      .다크모드체크::after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        display: block;
+        transition: transform 0.3s;
+      }
+
+      /* 다크모드가 켜지면 스위치 색을 바꿔요. */
+      .다크모드체크:checked {
+        background-color: #ff4d3d;
+      }
+
+      /* 체크되면 흰색 동그라미가 오른쪽으로 이동해요. */
+      .다크모드체크:checked::after {
+        transform: translateX(20px);
+      }
+
+      /* 첫 화면의 배너예요. */
+      .배너 {
+        padding: 34px 28px;
+        border-radius: 20px;
+        background: linear-gradient(120deg, #222222, #ff5b49);
+        color: white;
+      }
+
+      .배너제목 {
+        margin: 0 0 8px 0;
+        font-size: 30px;
+        font-weight: 700;
+      }
+
+      .배너설명 {
+        margin: 0;
+        color: #eeeeee;
+        font-size: 14px;
+        font-weight: 300;
+      }
+
+      /* 탭 메뉴예요. */
+      .탭 {
+        height: 78px;
+        display: flex;
+        gap: 26px;
+        align-items: flex-end;
+      }
+
+      .탭버튼 {
+        padding: 0 4px 12px 4px;
+        border-bottom: 3px solid transparent;
+        color: #999999;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .선택된탭 {
+        color: #111111;
+        border-bottom-color: #ff4d3d;
+      }
+
+      /* 검색과 필터 영역이에요. */
+      .도구영역 {
+        margin: 26px 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .선택창,
+      .검색창 {
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid #dddddd;
+        border-radius: 9px;
+        background-color: white;
+        font-size: 14px;
+      }
+
+      .검색창 {
+        width: 260px;
+      }
+
+      .기록버튼 {
+        height: 44px;
+        margin-left: auto;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 9px;
+        background-color: #ff4d3d;
+        color: white;
+        font-weight: bold;
+        transition: 0.2s;
+      }
+
+      .기록버튼:hover {
+        transform: scale(1.04);
+      }
+
+      /* 하루 운동 카드예요. */
+      .운동목록 {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .운동카드 {
+        padding: 22px;
+        border: 1px solid #dddddd;
+        border-radius: 18px;
+        background-color: white;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+        transition: 0.2s;
+      }
+
+      .운동카드:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+      }
+
+      .카드상단 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .날짜 {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .하루삭제버튼 {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+      }
+
+      .하루메모 {
+        margin: 12px 0;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f7f7f7;
+        font-size: 13px;
+      }
+
+      .종목한줄 {
+        padding: 12px 0;
+        border-top: 1px solid #eeeeee;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .종목이름 {
+        font-weight: bold;
+      }
+
+      .종목설명 {
+        margin-top: 5px;
+        color: #777777;
+        font-size: 13px;
+      }
+
+      .종목삭제버튼 {
+        border: 0;
+        background: none;
+        color: #999999;
+      }
+
+      .결과없음 {
+        padding: 80px 0;
+        color: #999999;
+        text-align: center;
+      }
+
+      /* 통계 탭이에요. */
+      .통계메뉴,
+      .오늘메뉴 {
+        display: none;
+      }
+
+      .메뉴제목 {
+        margin: 28px 0 18px 0;
+        font-size: 24px;
+      }
+
+      .통계카드목록 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .통계카드 {
+        padding: 18px;
+        border: 1px solid #dddddd;
+        border-radius: 14px;
+        background-color: white;
+      }
+
+      .통계이름 {
+        color: #777777;
+        font-size: 13px;
+      }
+
+      .통계숫자 {
+        margin-top: 8px;
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .통계상세 {
+        margin-top: 18px;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 14px;
+        background-color: white;
+      }
+
+      .부위한줄 {
+        margin-top: 14px;
+      }
+
+      .부위이름 {
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+      }
+
+      .막대배경 {
+        height: 10px;
+        border-radius: 6px;
+        background-color: #eeeeee;
+        overflow: hidden;
+      }
+
+      .막대 {
+        height: 100%;
+        background-color: #ff4d3d;
+      }
+
+      /* 오늘의 운동 탭이에요. */
+      .날씨카드,
+      .추천카드 {
+        margin-bottom: 16px;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 14px;
+        background-color: white;
+      }
+
+      .날씨그리드 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .날씨칸 {
+        padding: 12px;
+        border-radius: 10px;
+        background-color: #f6f6f6;
+      }
+
+      .날씨이름 {
+        color: #777777;
+        font-size: 12px;
+      }
+
+      .날씨값 {
+        margin-top: 5px;
+        font-weight: bold;
+      }
+
+      .새로고침버튼 {
+        padding: 9px 14px;
+        border: 0;
+        border-radius: 8px;
+        background-color: #111111;
+        color: white;
+      }
+
+      .추천제목 {
+        margin: 0 0 12px 0;
+        font-size: 20px;
+      }
+
+      .추천문장 {
+        line-height: 1.7;
+      }
+
+      /* 운동 등록 모달이에요. */
+      .모달배경 {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 20;
+      }
+
+      .모달 {
+        width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 28px;
+        border-radius: 20px;
+        background-color: white;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+      }
+
+      .모달제목 {
+        margin: 0 0 6px 0;
+        font-size: 24px;
+      }
+
+      .모달설명 {
+        margin: 0 0 24px 0;
+        color: #888888;
+        font-size: 13px;
+      }
+
+      /* 저장 완료, 삭제 확인용 작은 모달이에요. */
+      .작은모달 {
+        width: 360px;
+        padding: 30px 24px 24px 24px;
+        text-align: center;
+      }
+
+      .작은모달아이콘 {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 16px auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff0ee;
+        font-size: 26px;
+      }
+
+      .작은모달문장 {
+        margin: 8px 0 24px 0;
+        color: #666666;
+        line-height: 1.6;
+        font-weight: 300;
+      }
+
+      .가운데버튼영역 {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .입력묶음 {
+        margin-bottom: 16px;
+      }
+
+      .입력라벨 {
+        margin-bottom: 7px;
+        font-size: 13px;
+        font-weight: bold;
+      }
+
+      .입력창,
+      .모달선택창,
+      .메모입력 {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        background-color: white;
+        font-weight: 300;
+      }
+
+      .메모입력 {
+        height: 70px;
+        resize: none;
+      }
+
+      .두칸 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .모달버튼영역 {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .닫기버튼,
+      .등록하기버튼 {
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 8px;
+      }
+
+      .닫기버튼 {
+        background-color: #eeeeee;
+      }
+
+      .등록하기버튼 {
+        background-color: #ff4d3d;
+        color: white;
+        font-weight: bold;
+      }
+
+      /* body에 클래스 하나를 붙여서 다크모드를 바꿔요. 저장은 하지 않아요. */
+      body.다크모드 {
+        background-color: #181818;
+        color: white;
+      }
+
+      .다크모드 .선택된탭 {
+        color: white;
+      }
+
+      .다크모드 .운동카드,
+      .다크모드 .통계카드,
+      .다크모드 .통계상세,
+      .다크모드 .날씨카드,
+      .다크모드 .추천카드,
+      .다크모드 .모달 {
+        border-color: #444444;
+        background-color: #252525;
+      }
+
+      .다크모드 .선택창,
+      .다크모드 .검색창,
+      .다크모드 .입력창,
+      .다크모드 .모달선택창,
+      .다크모드 .메모입력 {
+        color: white;
+        border-color: #555555;
+        background-color: #333333;
+      }
+
+      .다크모드 .하루메모,
+      .다크모드 .날씨칸,
+      .다크모드 .작은모달아이콘 {
+        background-color: #333333;
+      }
+
+      .다크모드 .모달설명,
+      .다크모드 .작은모달문장 {
+        color: #bbbbbb;
+      }
+
+      .다크모드 .종목한줄 {
+        border-top-color: #444444;
+      }
+
+      /* 모바일 화면에서는 한 줄씩 보여 줘요. */
+      @media (max-width: 700px) {
+        /* 모바일에서는 토글 스위치를 조금 작게 보여 줘요. */
+        .다크모드체크 {
+          width: 40px;
+          height: 24px;
+        }
+
+        .다크모드체크::after {
+          width: 16px;
+          height: 16px;
+        }
+
+        .다크모드체크:checked::after {
+          transform: translateX(16px);
+        }
+
+        .탭 {
+          gap: 16px;
+        }
+
+        .탭버튼 {
+          font-size: 15px;
+        }
+
+        .도구영역 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .검색창 {
+          width: 100%;
+          grid-column: 1 / 3;
+        }
+
+        .기록버튼 {
+          margin-left: 0;
+        }
+
+        .통계카드목록,
+        .날씨그리드 {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .모달 {
+          width: 90%;
+        }
+      }
+
+      /* 페이지 아래쪽 푸터 영역이에요. */
+      .푸터바깥 {
+        margin-top: 70px;
+        background-color: #f5f5f5;
+      }
+
+      .푸터 {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px;
+      }
+
+      .푸터제목 {
+        margin-bottom: 12px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .푸터글씨 {
+        margin-top: 7px;
+        color: #999999;
+        font-size: 13px;
+      }
+
+      /* 다크모드에서는 푸터도 어둡게 바꿔요. */
+      .다크모드 .푸터바깥 {
+        background-color: #222222;
+      }
+
+      .다크모드 .푸터글씨 {
+        color: #aaaaaa;
+      }
+    </style>
+
+    <script>
+      /* 운동 기록 전체를 담는 배열이에요. */
+      let 운동일지 = [];
+      let 선택한부위 = "전체";
+      let 입력한검색어 = "";
+      let 검색타이머 = "아직실행안함";
+      let 삭제종류 = "";
+      let 삭제하루번호 = 0;
+      let 삭제종목순서 = -1;
+      let 날씨를불러왔는지 = false;
+      let 현재날씨 = null;
+
+      /* localStorage에서 운동 기록을 불러와요. */
+      function 처음화면준비하기() {
+        const 저장된운동 = localStorage.getItem("용휘운동일지");
+
+        if (저장된운동 !== null) {
+          운동일지 = JSON.parse(저장된운동);
+        }
+
+        운동목록그리기(운동일지);
+      }
+
+      /* 운동 기록을 localStorage에 저장해요. */
+      function 운동저장하기() {
+        localStorage.setItem("용휘운동일지", JSON.stringify(운동일지));
+      }
+
+      /* 날짜를 YYYY-MM-DD 모양으로 만들어요. */
+      function 오늘날짜가져오기() {
+        const 오늘 = new Date();
+        const 년 = 오늘.getFullYear();
+        const 월 = String(오늘.getMonth() + 1).padStart(2, "0");
+        const 일 = String(오늘.getDate()).padStart(2, "0");
+        return 년 + "-" + 월 + "-" + 일;
+      }
+
+      /* 탭을 누르면 선택한 메뉴만 보여 줘요. */
+      function 메뉴이동(메뉴이름) {
+        const 기록메뉴 = document.getElementById("기록메뉴");
+        const 통계메뉴 = document.getElementById("통계메뉴");
+        const 오늘메뉴 = document.getElementById("오늘메뉴");
+
+        기록메뉴.style.display = 메뉴이름 === "기록" ? "block" : "none";
+        통계메뉴.style.display = 메뉴이름 === "통계" ? "block" : "none";
+        오늘메뉴.style.display = 메뉴이름 === "오늘" ? "block" : "none";
+
+        document.getElementById("기록탭").className =
+          메뉴이름 === "기록" ? "탭버튼 선택된탭" : "탭버튼";
+        document.getElementById("통계탭").className =
+          메뉴이름 === "통계" ? "탭버튼 선택된탭" : "탭버튼";
+        document.getElementById("오늘탭").className =
+          메뉴이름 === "오늘" ? "탭버튼 선택된탭" : "탭버튼";
+
+        if (메뉴이름 === "통계") 통계그리기();
+
+        if (메뉴이름 === "오늘" && 날씨를불러왔는지 === false) {
+          현재위치가져오기();
+        }
+      }
+
+      /* 다크모드는 body 클래스만 바꿔요. 새로고침하면 원래대로 돌아와요. */
+      function 다크모드바꾸기() {
+        document.body.classList.toggle("다크모드");
+      }
+
+      /* 운동 한 종목의 설명 문장을 만들어요. */
+      function 운동설명만들기(운동) {
+        if (운동.유형 === "유산소") {
+          let 설명 = 운동.시간 + "분";
+          if (운동.거리 > 0) 설명 = 설명 + " · " + 운동.거리 + "km";
+          return 설명;
+        }
+
+        let 설명 = 운동.세트수 + "세트 · " + 운동.횟수 + "회";
+        if (운동.무게 > 0) 설명 = 운동.무게 + "kg · " + 설명;
+        return 설명;
+      }
+
+      /* 하루 운동 기록을 카드 HTML로 바꿔요. */
+      function 운동카드만들기(하루) {
+        let 종목HTML = "";
+
+        하루.운동목록.map(function (운동, 순서) {
+          종목HTML =
+            종목HTML +
+            `
+                    <div class="종목한줄">
+                        <div>
+                            <div class="종목이름">${운동.종목} · ${운동.부위}</div>
+                            <div class="종목설명">${운동설명만들기(운동)}</div>
+                        </div>
+                        <button class="종목삭제버튼" onclick="종목삭제하기(${하루.번호}, ${순서})">삭제</button>
+                    </div>
+                `;
+        });
+
+        const 메모HTML =
+          하루.메모 === "" ? "" : `<div class="하루메모">${하루.메모}</div>`;
+
+        return `
+                <div class="운동카드">
+                    <div class="카드상단">
+                        <div class="날짜">${하루.날짜}</div>
+                        <button class="하루삭제버튼" onclick="하루삭제하기(${하루.번호})">×</button>
+                    </div>
+                    ${메모HTML}
+                    ${종목HTML}
+                </div>
+            `;
+      }
+
+      /* 검색과 부위 필터를 적용한 뒤 카드를 화면에 그려요. */
+      function 운동목록그리기(목록) {
+        let 카드HTML = "";
+
+        const 정렬된목록 = 목록.slice().sort(function (앞, 뒤) {
+          return 뒤.날짜.localeCompare(앞.날짜);
+        });
+
+        정렬된목록.map(function (하루) {
+          카드HTML = 카드HTML + 운동카드만들기(하루);
+        });
+
+        if (카드HTML === "") {
+          카드HTML = '<div class="결과없음">아직 운동 기록이 없습니다.</div>';
+        }
+
+        document.getElementById("운동목록").innerHTML = 카드HTML;
+      }
+
+      /* 검색어와 부위 조건에 맞는 기록만 찾아요. */
+      function 운동검색하기() {
+        const 검색결과 = 운동일지.filter(function (하루) {
+          const 조건에맞는운동 = 하루.운동목록.filter(function (운동) {
+            const 부위가맞는지 =
+              선택한부위 === "전체" || 운동.부위 === 선택한부위;
+            const 검색어가있는지 = 운동.종목.indexOf(입력한검색어) !== -1;
+            return 부위가맞는지 && 검색어가있는지;
+          });
+
+          return 조건에맞는운동.length > 0;
+        });
+
+        운동목록그리기(검색결과);
+      }
+
+      function 부위바꾸기(event) {
+        선택한부위 = event.target.value;
+        운동검색하기();
+      }
+
+      /* 글자를 계속 입력할 때 너무 자주 검색하지 않도록 500ms 기다려요. */
+      function 검색어바꾸기(event) {
+        const 검색어 = event.target.value;
+        clearTimeout(검색타이머);
+
+        검색타이머 = setTimeout(function () {
+          입력한검색어 = 검색어;
+          운동검색하기();
+        }, 500);
+      }
+
+      /* 운동 등록 모달을 열어요. */
+      function 모달열기() {
+        document.getElementById("운동등록모달").style.display = "flex";
+        document.getElementById("날짜입력").value = 오늘날짜가져오기();
+        document.body.style.overflow = "hidden";
+      }
+
+      function 모달닫기() {
+        document.getElementById("운동등록모달").style.display = "none";
+        document.body.style.overflow = "";
+      }
+
+      /* 저장 완료 모달을 보여 줘요. */
+      function 완료모달열기() {
+        document.getElementById("저장완료모달").style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function 완료모달닫기() {
+        document.getElementById("저장완료모달").style.display = "none";
+        document.body.style.overflow = "";
+      }
+
+      /* 웨이트/유산소를 바꾸면 필요한 입력칸만 보여 줘요. */
+      function 운동유형바꾸기() {
+        const 유형 = document.getElementById("유형입력").value;
+        const 웨이트입력 = document.getElementById("웨이트입력");
+        const 유산소입력 = document.getElementById("유산소입력");
+        const 부위입력 = document.getElementById("부위입력");
+
+        if (유형 === "유산소") {
+          웨이트입력.style.display = "none";
+          유산소입력.style.display = "grid";
+          부위입력.value = "유산소";
+        } else {
+          웨이트입력.style.display = "grid";
+          유산소입력.style.display = "none";
+          if (부위입력.value === "유산소") 부위입력.value = "상체";
+        }
+      }
+
+      /* 입력한 운동 한 종목을 배열에 추가해요. */
+      function 운동등록하기() {
+        const 날짜 = document.getElementById("날짜입력").value;
+        const 유형 = document.getElementById("유형입력").value;
+        const 부위 = document.getElementById("부위입력").value;
+        const 종목 = document.getElementById("종목입력").value.trim();
+        const 메모 = document.getElementById("메모입력").value.trim();
+
+        if (날짜 === "" || 종목 === "") {
+          alert("날짜와 운동 종목을 입력해 주세요.");
+          return;
+        }
+
+        const 새운동 = {
+          유형: 유형,
+          부위: 부위,
+          종목: 종목,
+          세트수: Number(document.getElementById("세트입력").value) || 0,
+          무게: Number(document.getElementById("무게입력").value) || 0,
+          횟수: Number(document.getElementById("횟수입력").value) || 0,
+          시간: Number(document.getElementById("시간입력").value) || 0,
+          거리: Number(document.getElementById("거리입력").value) || 0,
+        };
+
+        /* 같은 날짜가 있으면 새 카드를 만들지 않고 그 날짜에 운동을 추가해요. */
+        let 같은날짜 = 운동일지.find(function (하루) {
+          return 하루.날짜 === 날짜;
+        });
+
+        if (같은날짜 === undefined) {
+          같은날짜 = {
+            번호: new Date().getTime(),
+            날짜: 날짜,
+            메모: 메모,
+            운동목록: [],
+          };
+          운동일지.push(같은날짜);
+        }
+
+        같은날짜.운동목록.push(새운동);
+        if (메모 !== "") 같은날짜.메모 = 메모;
+
+        운동저장하기();
+        운동검색하기();
+        입력값초기화하기();
+        모달닫기();
+        완료모달열기();
+      }
+
+      /* 등록 후 입력창을 비워 줘요. */
+      function 입력값초기화하기() {
+        document.getElementById("종목입력").value = "";
+        document.getElementById("메모입력").value = "";
+        document.getElementById("세트입력").value = "3";
+        document.getElementById("무게입력").value = "";
+        document.getElementById("횟수입력").value = "10";
+        document.getElementById("시간입력").value = "30";
+        document.getElementById("거리입력").value = "";
+      }
+
+      /* 삭제 버튼을 누르면 삭제 확인 모달을 먼저 보여 줘요. */
+      function 하루삭제하기(번호) {
+        삭제종류 = "하루";
+        삭제하루번호 = 번호;
+        삭제종목순서 = -1;
+        document.getElementById("삭제문장").innerText =
+          "이 날짜의 운동 기록을 모두 삭제할까요?";
+        document.getElementById("삭제확인모달").style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function 종목삭제하기(하루번호, 종목순서) {
+        삭제종류 = "종목";
+        삭제하루번호 = 하루번호;
+        삭제종목순서 = 종목순서;
+        document.getElementById("삭제문장").innerText =
+          "이 운동 종목을 삭제할까요?";
+        document.getElementById("삭제확인모달").style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function 삭제모달닫기() {
+        document.getElementById("삭제확인모달").style.display = "none";
+        document.body.style.overflow = "";
+      }
+
+      /* 실제 삭제는 확인 버튼을 눌렀을 때 실행해요. */
+      function 삭제확인하기() {
+        if (삭제종류 === "하루") {
+          운동일지 = 운동일지.filter(function (하루) {
+            return 하루.번호 !== 삭제하루번호;
+          });
+        }
+
+        if (삭제종류 === "종목") {
+          const 하루 = 운동일지.find(function (기록) {
+            return 기록.번호 === 삭제하루번호;
+          });
+
+          if (하루 !== undefined) {
+            하루.운동목록.splice(삭제종목순서, 1);
+
+            if (하루.운동목록.length === 0) {
+              운동일지 = 운동일지.filter(function (기록) {
+                return 기록.번호 !== 삭제하루번호;
+              });
+            }
+          }
+        }
+
+        운동저장하기();
+        운동검색하기();
+        삭제모달닫기();
+      }
+
+      /* 이번 달 운동 기록을 간단하게 계산해요. */
+      function 통계그리기() {
+        const 이번달 = 오늘날짜가져오기().slice(0, 7);
+        let 운동일수 = 0;
+        let 종목수 = 0;
+        let 세트수 = 0;
+        let 유산소거리 = 0;
+        let 상체 = 0;
+        let 하체 = 0;
+        let 코어 = 0;
+        let 유산소 = 0;
+        let 종목횟수 = {};
+
+        운동일지.map(function (하루) {
+          if (하루.날짜.slice(0, 7) !== 이번달) return;
+
+          운동일수 = 운동일수 + 1;
+
+          하루.운동목록.map(function (운동) {
+            종목수 = 종목수 + 1;
+
+            if (운동.유형 === "웨이트") 세트수 = 세트수 + 운동.세트수;
+            if (운동.유형 === "유산소") 유산소거리 = 유산소거리 + 운동.거리;
+
+            if (운동.부위 === "상체") 상체 = 상체 + 1;
+            if (운동.부위 === "하체") 하체 = 하체 + 1;
+            if (운동.부위 === "코어") 코어 = 코어 + 1;
+            if (운동.부위 === "유산소") 유산소 = 유산소 + 1;
+
+            if (종목횟수[운동.종목] === undefined) 종목횟수[운동.종목] = 0;
+            종목횟수[운동.종목] = 종목횟수[운동.종목] + 1;
+          });
+        });
+
+        document.getElementById("운동일수").innerText = 운동일수 + "일";
+        document.getElementById("종목수").innerText = 종목수 + "개";
+        document.getElementById("세트수").innerText = 세트수 + "세트";
+        document.getElementById("유산소거리").innerText =
+          유산소거리.toFixed(1) + "km";
+
+        const 전체 = 상체 + 하체 + 코어 + 유산소;
+        부위막대그리기("상체", 상체, 전체);
+        부위막대그리기("하체", 하체, 전체);
+        부위막대그리기("코어", 코어, 전체);
+        부위막대그리기("유산소", 유산소, 전체);
+
+        let 가장많이한종목 = "기록 없음";
+        let 가장많은횟수 = 0;
+
+        Object.keys(종목횟수).map(function (종목) {
+          if (종목횟수[종목] > 가장많은횟수) {
+            가장많은횟수 = 종목횟수[종목];
+            가장많이한종목 = 종목;
+          }
+        });
+
+        document.getElementById("자주한운동").innerText = 가장많이한종목;
+      }
+
+      function 부위막대그리기(부위, 개수, 전체) {
+        let 퍼센트 = 0;
+        if (전체 > 0) 퍼센트 = Math.round((개수 / 전체) * 100);
+
+        document.getElementById(부위 + "퍼센트").innerText = 퍼센트 + "%";
+        document.getElementById(부위 + "막대").style.width = 퍼센트 + "%";
+      }
+
+      /* 브라우저에서 현재 위치를 요청해요. 거부하면 서울 좌표를 사용해요. */
+      function 현재위치가져오기() {
+        document.getElementById("날씨상태").innerText =
+          "날씨를 불러오는 중입니다.";
+
+        if (navigator.geolocation === undefined) {
+          날씨불러오기(37.5665, 126.978, "서울 (기본 위치)");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          function (위치) {
+            날씨불러오기(
+              위치.coords.latitude,
+              위치.coords.longitude,
+              "현재 위치",
+            );
+          },
+          function () {
+            날씨불러오기(37.5665, 126.978, "서울 (기본 위치)");
+          },
+        );
+      }
+
+      /* Open-Meteo 날씨 API를 fetch로 불러와요. */
+      function 날씨불러오기(위도, 경도, 위치이름) {
+        const 날씨주소 =
+          "https://api.open-meteo.com/v1/forecast?latitude=" +
+          위도 +
+          "&longitude=" +
+          경도 +
+          "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation";
+
+        fetch(날씨주소)
+          .then(function (결과) {
+            return 결과.json();
+          })
+          .then(function (날씨결과) {
+            현재날씨 = 날씨결과.current;
+            날씨화면그리기(위치이름);
+            공기질불러오기(위도, 경도);
+          })
+          .catch(function () {
+            document.getElementById("날씨상태").innerText =
+              "날씨 정보를 불러오지 못했습니다.";
+            추천그리기();
+          });
+      }
+
+      /* 같은 위치의 공기질 정보도 Open-Meteo에서 불러와요. */
+      function 공기질불러오기(위도, 경도) {
+        const 공기주소 =
+          "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" +
+          위도 +
+          "&longitude=" +
+          경도 +
+          "&current=pm2_5,pm10,european_aqi";
+
+        fetch(공기주소)
+          .then(function (결과) {
+            return 결과.json();
+          })
+          .then(function (공기결과) {
+            현재날씨.pm25 = 공기결과.current.pm2_5;
+            현재날씨.pm10 = 공기결과.current.pm10;
+            현재날씨.aqi = 공기결과.current.european_aqi;
+            날씨를불러왔는지 = true;
+            공기질화면그리기();
+            추천그리기();
+          })
+          .catch(function () {
+            날씨를불러왔는지 = true;
+            추천그리기();
+          });
+      }
+
+      function 날씨화면그리기(위치이름) {
+        document.getElementById("날씨상태").innerText = 위치이름;
+        document.getElementById("기온").innerText =
+          현재날씨.temperature_2m + "℃";
+        document.getElementById("체감온도").innerText =
+          현재날씨.apparent_temperature + "℃";
+        document.getElementById("습도").innerText =
+          현재날씨.relative_humidity_2m + "%";
+        document.getElementById("강수").innerText =
+          현재날씨.precipitation + "mm";
+      }
+
+      function 공기질화면그리기() {
+        document.getElementById("미세먼지").innerText = 현재날씨.pm25 + "㎍/㎥";
+        document.getElementById("AQI").innerText = 현재날씨.aqi;
+      }
+
+      /* 최근 운동 부위와 날씨를 보고 아주 간단하게 오늘 운동을 추천해요. */
+      function 추천그리기() {
+        let 상체 = 0;
+        let 하체 = 0;
+        let 코어 = 0;
+
+        const 최근기록 = 운동일지
+          .slice()
+          .sort(function (앞, 뒤) {
+            return 뒤.날짜.localeCompare(앞.날짜);
+          })
+          .slice(0, 3);
+
+        최근기록.map(function (하루) {
+          하루.운동목록.map(function (운동) {
+            if (운동.부위 === "상체") 상체 = 상체 + 1;
+            if (운동.부위 === "하체") 하체 = 하체 + 1;
+            if (운동.부위 === "코어") 코어 = 코어 + 1;
+          });
+        });
+
+        let 추천부위 = "상체";
+        if (하체 <= 상체 && 하체 <= 코어) 추천부위 = "하체";
+        if (코어 <= 상체 && 코어 <= 하체) 추천부위 = "코어";
+
+        let 장소추천 = "가벼운 야외 유산소를 함께 해도 좋습니다.";
+
+        if (현재날씨 !== null) {
+          if (현재날씨.precipitation > 0 || 현재날씨.aqi > 100) {
+            장소추천 = "비나 공기질을 고려해 오늘은 실내 운동을 추천합니다.";
+          }
+        }
+
+        if (운동일지.length === 0) {
+          document.getElementById("추천내용").innerText =
+            "아직 운동 기록이 없습니다. 오늘은 상체, 하체, 코어 중 한 부위를 가볍게 시작해 보세요. " +
+            장소추천;
+        } else {
+          document.getElementById("추천내용").innerText =
+            "최근 3일 기록에서 비교적 적게 한 부위는 " +
+            추천부위 +
+            "입니다. 오늘은 " +
+            추천부위 +
+            " 운동을 추천합니다. " +
+            장소추천;
+        }
+      }
+
+      /* ESC 키를 누르면 열려 있는 모달을 닫아요. */
+      window.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") return;
+
+        if (document.getElementById("삭제확인모달").style.display === "flex") {
+          삭제모달닫기();
+          return;
+        }
+
+        if (document.getElementById("저장완료모달").style.display === "flex") {
+          완료모달닫기();
+          return;
+        }
+
+        if (document.getElementById("운동등록모달").style.display === "flex") {
+          모달닫기();
+        }
+      });
+
+      window.onload = function () {
+        처음화면준비하기();
+      };
+    </script>
+  </head>
+
+  <body>
+    <div class="페이지">
+      <div class="상단">
+        <div class="로고">용휘의 운동일지</div>
+        <label class="다크모드영역">
+          <span>다크모드</span>
+          <input
+            class="다크모드체크"
+            type="checkbox"
+            onclick="다크모드바꾸기()"
+          />
+        </label>
+      </div>
+
+      <div class="배너">
+        <h1 class="배너제목">오늘도 한 세트 더.</h1>
+        <p class="배너설명">
+          운동 기록을 남기고, 이번 달 통계와 오늘의 운동 추천도 확인해 보세요.
+        </p>
+      </div>
+
+      <div class="탭">
+        <div class="탭버튼 선택된탭" id="기록탭" onclick="메뉴이동('기록')">
+          운동 기록
+        </div>
+        <div class="탭버튼" id="통계탭" onclick="메뉴이동('통계')">
+          운동 통계
+        </div>
+        <div class="탭버튼" id="오늘탭" onclick="메뉴이동('오늘')">
+          오늘의 운동
+        </div>
+      </div>
+
+      <!-- 첫 번째 탭: 운동 기록 -->
+      <div id="기록메뉴">
+        <div class="도구영역">
+          <select class="선택창" onchange="부위바꾸기(event)">
+            <option value="전체">전체 부위</option>
+            <option value="상체">상체</option>
+            <option value="하체">하체</option>
+            <option value="코어">코어</option>
+            <option value="유산소">유산소</option>
+          </select>
+          <input
+            class="검색창"
+            type="text"
+            placeholder="운동 종목 검색"
+            oninput="검색어바꾸기(event)"
+          />
+          <button class="기록버튼" onclick="모달열기()">+ 운동 기록</button>
+        </div>
+
+        <div class="운동목록" id="운동목록"></div>
+      </div>
+
+      <!-- 두 번째 탭: 운동 통계 -->
+      <div class="통계메뉴" id="통계메뉴">
+        <h2 class="메뉴제목">이번 달 운동 통계</h2>
+
+        <div class="통계카드목록">
+          <div class="통계카드">
+            <div class="통계이름">운동일</div>
+            <div class="통계숫자" id="운동일수">0일</div>
+          </div>
+          <div class="통계카드">
+            <div class="통계이름">운동 종목</div>
+            <div class="통계숫자" id="종목수">0개</div>
+          </div>
+          <div class="통계카드">
+            <div class="통계이름">웨이트 세트</div>
+            <div class="통계숫자" id="세트수">0세트</div>
+          </div>
+          <div class="통계카드">
+            <div class="통계이름">유산소 거리</div>
+            <div class="통계숫자" id="유산소거리">0.0km</div>
+          </div>
+        </div>
+
+        <div class="통계상세">
+          <b>부위별 운동 비율</b>
+
+          <div class="부위한줄">
+            <div class="부위이름">
+              <span>상체</span><span id="상체퍼센트">0%</span>
+            </div>
+            <div class="막대배경">
+              <div class="막대" id="상체막대" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="부위한줄">
+            <div class="부위이름">
+              <span>하체</span><span id="하체퍼센트">0%</span>
+            </div>
+            <div class="막대배경">
+              <div class="막대" id="하체막대" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="부위한줄">
+            <div class="부위이름">
+              <span>코어</span><span id="코어퍼센트">0%</span>
+            </div>
+            <div class="막대배경">
+              <div class="막대" id="코어막대" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="부위한줄">
+            <div class="부위이름">
+              <span>유산소</span><span id="유산소퍼센트">0%</span>
+            </div>
+            <div class="막대배경">
+              <div class="막대" id="유산소막대" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <p style="margin-bottom: 0">
+            가장 자주 한 운동: <b id="자주한운동">기록 없음</b>
+          </p>
+        </div>
+      </div>
+
+      <!-- 세 번째 탭: 날씨 API + 추천 -->
+      <div class="오늘메뉴" id="오늘메뉴">
+        <h2 class="메뉴제목">오늘의 운동 가이드</h2>
+
+        <div class="날씨카드">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              gap: 10px;
+              align-items: center;
+            "
+          >
+            <div>
+              <b>현재 날씨와 공기질</b>
+              <div
+                id="날씨상태"
+                style="margin-top: 6px; color: #777777; font-size: 13px"
+              >
+                탭을 열면 날씨를 불러옵니다.
+              </div>
+            </div>
+            <button class="새로고침버튼" onclick="현재위치가져오기()">
+              새로고침
+            </button>
+          </div>
+
+          <div class="날씨그리드">
+            <div class="날씨칸">
+              <div class="날씨이름">기온</div>
+              <div class="날씨값" id="기온">-</div>
+            </div>
+            <div class="날씨칸">
+              <div class="날씨이름">체감온도</div>
+              <div class="날씨값" id="체감온도">-</div>
+            </div>
+            <div class="날씨칸">
+              <div class="날씨이름">습도</div>
+              <div class="날씨값" id="습도">-</div>
+            </div>
+            <div class="날씨칸">
+              <div class="날씨이름">강수</div>
+              <div class="날씨값" id="강수">-</div>
+            </div>
+            <div class="날씨칸">
+              <div class="날씨이름">PM2.5</div>
+              <div class="날씨값" id="미세먼지">-</div>
+            </div>
+            <div class="날씨칸">
+              <div class="날씨이름">AQI</div>
+              <div class="날씨값" id="AQI">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="추천카드">
+          <h3 class="추천제목">오늘의 추천</h3>
+          <div class="추천문장" id="추천내용">
+            최근 운동 기록과 날씨 정보를 확인해서 추천해 드립니다.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 운동 등록 모달 -->
+    <!-- 페이지 아래쪽 푸터 -->
+    <div class="푸터바깥">
+      <div class="푸터">
+        <div class="푸터제목">용휘의 운동일지</div>
+        <div class="푸터글씨">
+          나의 운동 기록과 오늘의 운동을 한 곳에서 관리합니다.
+        </div>
+        <div class="푸터글씨">Workout Log Project</div>
+      </div>
+    </div>
+
+    <div class="모달배경" id="운동등록모달" onclick="모달닫기()">
+      <div class="모달" onclick="event.stopPropagation()">
+        <h2 class="모달제목">운동 기록하기</h2>
+        <p class="모달설명">오늘 한 운동을 한 종목씩 간단하게 기록해 보세요.</p>
+
+        <div class="두칸">
+          <div class="입력묶음">
+            <div class="입력라벨">날짜</div>
+            <input class="입력창" id="날짜입력" type="date" />
+          </div>
+
+          <div class="입력묶음">
+            <div class="입력라벨">운동 유형</div>
+            <select
+              class="모달선택창"
+              id="유형입력"
+              onchange="운동유형바꾸기()"
+            >
+              <option value="웨이트">웨이트</option>
+              <option value="유산소">유산소</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="입력묶음">
+          <div class="입력라벨">운동 부위</div>
+          <select class="모달선택창" id="부위입력">
+            <option value="상체">상체</option>
+            <option value="하체">하체</option>
+            <option value="코어">코어</option>
+            <option value="유산소">유산소</option>
+          </select>
+        </div>
+
+        <div class="입력묶음">
+          <div class="입력라벨">운동 종목</div>
+          <input
+            class="입력창"
+            id="종목입력"
+            type="text"
+            placeholder="예: 벤치프레스, 러닝"
+          />
+        </div>
+
+        <!-- 웨이트일 때 보여 주는 입력칸 -->
+        <div class="두칸" id="웨이트입력">
+          <div class="입력묶음">
+            <div class="입력라벨">세트 수</div>
+            <input
+              class="입력창"
+              id="세트입력"
+              type="number"
+              value="3"
+              min="1"
+            />
+          </div>
+          <div class="입력묶음">
+            <div class="입력라벨">무게(kg)</div>
+            <input
+              class="입력창"
+              id="무게입력"
+              type="number"
+              min="0"
+              step="0.5"
+            />
+          </div>
+          <div class="입력묶음">
+            <div class="입력라벨">횟수</div>
+            <input
+              class="입력창"
+              id="횟수입력"
+              type="number"
+              value="10"
+              min="1"
+            />
+          </div>
+        </div>
+
+        <!-- 유산소일 때 보여 주는 입력칸 -->
+        <div class="두칸" id="유산소입력" style="display: none">
+          <div class="입력묶음">
+            <div class="입력라벨">운동 시간(분)</div>
+            <input
+              class="입력창"
+              id="시간입력"
+              type="number"
+              value="30"
+              min="1"
+            />
+          </div>
+          <div class="입력묶음">
+            <div class="입력라벨">거리(km)</div>
+            <input
+              class="입력창"
+              id="거리입력"
+              type="number"
+              min="0"
+              step="0.1"
+            />
+          </div>
+        </div>
+
+        <div class="입력묶음">
+          <div class="입력라벨">오늘 메모 (선택)</div>
+          <textarea
+            class="메모입력"
+            id="메모입력"
+            placeholder="컨디션이나 특이사항을 적어 보세요."
+          ></textarea>
+        </div>
+
+        <div class="모달버튼영역">
+          <button class="닫기버튼" onclick="모달닫기()">닫기</button>
+          <button class="등록하기버튼" onclick="운동등록하기()">
+            등록하기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 운동 저장 완료 모달 -->
+    <div class="모달배경" id="저장완료모달" onclick="완료모달닫기()">
+      <div class="모달 작은모달" onclick="event.stopPropagation()">
+        <div class="작은모달아이콘">✓</div>
+        <h2 class="모달제목">저장 완료</h2>
+        <p class="작은모달문장">운동 기록이 저장되었습니다.</p>
+        <div class="가운데버튼영역">
+          <button class="등록하기버튼" onclick="완료모달닫기()">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div class="모달배경" id="삭제확인모달" onclick="삭제모달닫기()">
+      <div class="모달 작은모달" onclick="event.stopPropagation()">
+        <div class="작은모달아이콘">!</div>
+        <h2 class="모달제목">삭제 확인</h2>
+        <p class="작은모달문장" id="삭제문장">이 기록을 삭제할까요?</p>
+        <div class="가운데버튼영역">
+          <button class="닫기버튼" onclick="삭제모달닫기()">취소</button>
+          <button class="등록하기버튼" onclick="삭제확인하기()">삭제</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
