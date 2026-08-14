@@ -1,0 +1,669 @@
+/* 모든 요소의 크기를 계산하기 쉽게 만들어요. */
+      * {
+        box-sizing: border-box;
+      }
+
+      /* Gmarket Sans 폰트를 불러와요. */
+      @font-face {
+        font-family: "GmarketSans";
+        src: url("../fonts/GmarketSansTTFLight.ttf") format("truetype");
+        font-weight: 300;
+      }
+
+      @font-face {
+        font-family: "GmarketSans";
+        src: url("../fonts/GmarketSansTTFMedium.ttf") format("truetype");
+        font-weight: 500;
+      }
+
+      @font-face {
+        font-family: "GmarketSans";
+        src: url("../fonts/GmarketSansTTFBold.ttf") format("truetype");
+        font-weight: 700;
+      }
+
+      body {
+        margin: 0;
+        background-color: #f7f7f5;
+        color: #111111;
+        font-family: "GmarketSans", sans-serif;
+        font-weight: 500;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font-family: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .페이지 {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px 60px 20px;
+      }
+
+      /* 상단 제목과 다크모드 영역이에요. */
+      .상단 {
+        height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .로고 {
+        font-size: 22px;
+        font-weight: bold;
+      }
+
+      .다크모드영역 {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 13px;
+      }
+
+      /* 다크모드 토글 스위치 디자인이에요. */
+      .다크모드체크 {
+        appearance: none;
+        width: 48px;
+        height: 28px;
+        margin: 0;
+        padding: 4px;
+        border: 0;
+        border-radius: 20px;
+        background-color: #dddddd;
+        cursor: pointer;
+      }
+
+      /* 스위치 안에 있는 흰색 동그라미예요. */
+      .다크모드체크::after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        display: block;
+        transition: transform 0.3s;
+      }
+
+      /* 다크모드가 켜지면 스위치 색을 바꿔요. */
+      .다크모드체크:checked {
+        background-color: #ff4d3d;
+      }
+
+      /* 체크되면 흰색 동그라미가 오른쪽으로 이동해요. */
+      .다크모드체크:checked::after {
+        transform: translateX(20px);
+      }
+
+      /* 첫 화면의 배너예요. */
+      .배너 {
+        padding: 34px 28px;
+        border-radius: 20px;
+        background: linear-gradient(120deg, #222222, #ff5b49);
+        color: white;
+      }
+
+      .배너제목 {
+        margin: 0 0 8px 0;
+        font-size: 30px;
+        font-weight: 700;
+      }
+
+      .배너설명 {
+        margin: 0;
+        color: #eeeeee;
+        font-size: 14px;
+        font-weight: 300;
+      }
+
+      /* 탭 메뉴예요. */
+      .탭 {
+        height: 78px;
+        display: flex;
+        gap: 26px;
+        align-items: flex-end;
+      }
+
+      .탭버튼 {
+        padding: 0 4px 12px 4px;
+        border-bottom: 3px solid transparent;
+        color: #999999;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .선택된탭 {
+        color: #111111;
+        border-bottom-color: #ff4d3d;
+      }
+
+      /* 검색과 필터 영역이에요. */
+      .도구영역 {
+        margin: 26px 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .선택창,
+      .검색창 {
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid #dddddd;
+        border-radius: 9px;
+        background-color: white;
+        font-size: 14px;
+      }
+
+      .검색창 {
+        width: 260px;
+      }
+
+      .기록버튼 {
+        height: 44px;
+        margin-left: auto;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 9px;
+        background-color: #ff4d3d;
+        color: white;
+        font-weight: bold;
+        transition: 0.2s;
+      }
+
+      .기록버튼:hover {
+        transform: scale(1.04);
+      }
+
+      /* 하루 운동 카드예요. */
+      .운동목록 {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .운동카드 {
+        padding: 22px;
+        border: 1px solid #dddddd;
+        border-radius: 18px;
+        background-color: white;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+        transition: 0.2s;
+      }
+
+      .운동카드:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+      }
+
+      .카드상단 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .날짜 {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .하루삭제버튼 {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+      }
+
+      .하루메모 {
+        margin: 12px 0;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f7f7f7;
+        font-size: 13px;
+      }
+
+      .종목한줄 {
+        padding: 12px 0;
+        border-top: 1px solid #eeeeee;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .종목이름 {
+        font-weight: bold;
+      }
+
+      .종목설명 {
+        margin-top: 5px;
+        color: #777777;
+        font-size: 13px;
+      }
+
+      .종목삭제버튼 {
+        border: 0;
+        background: none;
+        color: #999999;
+      }
+
+      .결과없음 {
+        padding: 80px 0;
+        color: #999999;
+        text-align: center;
+      }
+
+      /* 통계 탭이에요. */
+      .통계메뉴,
+      .오늘메뉴 {
+        display: none;
+      }
+
+      .메뉴제목 {
+        margin: 28px 0 18px 0;
+        font-size: 24px;
+      }
+
+      .통계카드목록 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .통계카드 {
+        padding: 18px;
+        border: 1px solid #dddddd;
+        border-radius: 14px;
+        background-color: white;
+      }
+
+      .통계이름 {
+        color: #777777;
+        font-size: 13px;
+      }
+
+      .통계숫자 {
+        margin-top: 8px;
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .통계상세 {
+        margin-top: 18px;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 14px;
+        background-color: white;
+      }
+
+      .부위한줄 {
+        margin-top: 14px;
+      }
+
+      .부위이름 {
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+      }
+
+      .막대배경 {
+        height: 10px;
+        border-radius: 6px;
+        background-color: #eeeeee;
+        overflow: hidden;
+      }
+
+      .막대 {
+        height: 100%;
+        background-color: #ff4d3d;
+      }
+
+      /* 오늘의 운동 탭이에요. */
+      .날씨카드,
+      .추천카드 {
+        margin-bottom: 16px;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 14px;
+        background-color: white;
+      }
+
+      .날씨그리드 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .날씨칸 {
+        padding: 12px;
+        border-radius: 10px;
+        background-color: #f6f6f6;
+      }
+
+      .날씨이름 {
+        color: #777777;
+        font-size: 12px;
+      }
+
+      .날씨값 {
+        margin-top: 5px;
+        font-weight: bold;
+      }
+
+      .새로고침버튼 {
+        padding: 9px 14px;
+        border: 0;
+        border-radius: 8px;
+        background-color: #111111;
+        color: white;
+      }
+
+      .추천제목 {
+        margin: 0 0 12px 0;
+        font-size: 20px;
+      }
+
+      .추천문장 {
+        line-height: 1.7;
+      }
+
+      /* 운동 등록 모달이에요. */
+      .모달배경 {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 20;
+      }
+
+      .모달 {
+        width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 28px;
+        border-radius: 20px;
+        background-color: white;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+      }
+
+      .모달제목 {
+        margin: 0 0 6px 0;
+        font-size: 24px;
+      }
+
+      .모달설명 {
+        margin: 0 0 24px 0;
+        color: #888888;
+        font-size: 13px;
+      }
+
+      /* 저장 완료, 삭제 확인용 작은 모달이에요. */
+      .작은모달 {
+        width: 360px;
+        padding: 30px 24px 24px 24px;
+        text-align: center;
+      }
+
+      .작은모달아이콘 {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 16px auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff0ee;
+        font-size: 26px;
+      }
+
+      .작은모달문장 {
+        margin: 8px 0 24px 0;
+        color: #666666;
+        line-height: 1.6;
+        font-weight: 300;
+      }
+
+      .가운데버튼영역 {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      /* 운동 카드 상세보기 모달 안의 내용이에요. */
+      .상세날짜 {
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: #888888;
+      }
+
+      .상세메모 {
+        margin: 16px 0;
+        padding: 12px;
+        border-radius: 10px;
+        background-color: #f6f6f6;
+        font-size: 13px;
+      }
+
+      .상세종목 {
+        padding: 14px 0;
+        border-top: 1px solid #eeeeee;
+      }
+
+      .상세종목이름 {
+        font-weight: bold;
+      }
+
+      .상세종목설명 {
+        margin-top: 6px;
+        color: #777777;
+        font-size: 13px;
+      }
+
+      .입력묶음 {
+        margin-bottom: 16px;
+      }
+
+      .입력라벨 {
+        margin-bottom: 7px;
+        font-size: 13px;
+        font-weight: bold;
+      }
+
+      .입력창,
+      .모달선택창,
+      .메모입력 {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        background-color: white;
+        font-weight: 300;
+      }
+
+      .메모입력 {
+        height: 70px;
+        resize: none;
+      }
+
+      .두칸 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .모달버튼영역 {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .닫기버튼,
+      .등록하기버튼 {
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 8px;
+      }
+
+      .닫기버튼 {
+        background-color: #eeeeee;
+      }
+
+      .등록하기버튼 {
+        background-color: #ff4d3d;
+        color: white;
+        font-weight: bold;
+      }
+
+      /* body에 클래스 하나를 붙여서 다크모드를 바꿔요. 저장은 하지 않아요. */
+      body.다크모드 {
+        background-color: #181818;
+        color: white;
+      }
+
+      .다크모드 .선택된탭 {
+        color: white;
+      }
+
+      .다크모드 .운동카드,
+      .다크모드 .통계카드,
+      .다크모드 .통계상세,
+      .다크모드 .날씨카드,
+      .다크모드 .추천카드,
+      .다크모드 .모달 {
+        border-color: #444444;
+        background-color: #252525;
+      }
+
+      .다크모드 .선택창,
+      .다크모드 .검색창,
+      .다크모드 .입력창,
+      .다크모드 .모달선택창,
+      .다크모드 .메모입력 {
+        color: white;
+        border-color: #555555;
+        background-color: #333333;
+      }
+
+      .다크모드 .하루메모,
+      .다크모드 .날씨칸,
+      .다크모드 .작은모달아이콘 {
+        background-color: #333333;
+      }
+
+      .다크모드 .모달설명,
+      .다크모드 .작은모달문장 {
+        color: #bbbbbb;
+      }
+
+      .다크모드 .종목한줄,
+      .다크모드 .상세종목 {
+        border-top-color: #444444;
+      }
+
+      .다크모드 .상세메모 {
+        background-color: #333333;
+      }
+
+      .다크모드 .상세날짜,
+      .다크모드 .상세종목설명 {
+        color: #bbbbbb;
+      }
+
+      /* 모바일 화면에서는 한 줄씩 보여 줘요. */
+      @media (max-width: 700px) {
+        /* 모바일에서는 토글 스위치를 조금 작게 보여 줘요. */
+        .다크모드체크 {
+          width: 40px;
+          height: 24px;
+        }
+
+        .다크모드체크::after {
+          width: 16px;
+          height: 16px;
+        }
+
+        .다크모드체크:checked::after {
+          transform: translateX(16px);
+        }
+
+        .탭 {
+          gap: 16px;
+        }
+
+        .탭버튼 {
+          font-size: 15px;
+        }
+
+        .도구영역 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .검색창 {
+          width: 100%;
+          grid-column: 1 / 3;
+        }
+
+        .기록버튼 {
+          margin-left: 0;
+        }
+
+        .통계카드목록,
+        .날씨그리드 {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .모달 {
+          width: 90%;
+        }
+      }
+
+      /* 페이지 아래쪽 푸터 영역이에요. */
+      .푸터바깥 {
+        margin-top: 70px;
+        background-color: #f5f5f5;
+      }
+
+      .푸터 {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px;
+      }
+
+      .푸터제목 {
+        margin-bottom: 12px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .푸터글씨 {
+        margin-top: 7px;
+        color: #999999;
+        font-size: 13px;
+      }
+
+      /* 다크모드에서는 푸터도 어둡게 바꿔요. */
+      .다크모드 .푸터바깥 {
+        background-color: #222222;
+      }
+
+      .다크모드 .푸터글씨 {
+        color: #aaaaaa;
+      }
