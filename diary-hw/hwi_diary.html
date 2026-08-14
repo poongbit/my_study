@@ -1,11 +1,110 @@
 <!doctype html>
 <html lang="ko">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="용휘의 다이어리 - 기분을 기록하고 하루를 돌아보는 개인 다이어리 웹앱"
+    />
     <title>용휘의 다이어리</title>
+
+    <!-- 폰트: 본문은 Noto Sans KR(가독성/광범위 지원), 제목·감성 포인트는 Gowun Dodum(손글씨 느낌) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
       * {
         box-sizing: border-box;
+      }
+
+      /* 폼 요소는 기본적으로 폰트를 상속하지 않는 브라우저가 많아 명시적으로 지정 */
+      button,
+      input,
+      select,
+      textarea {
+        font-family: inherit;
+      }
+
+      /* 표준 포커스 표시자: 브라우저 기본 아웃라인을 지우는 대신 일관된 스타일로 통일 */
+      a,
+      button,
+      input,
+      select,
+      textarea,
+      [tabindex] {
+        outline-offset: 2px;
+      }
+
+      /* ---------- 폰트 (웹폰트 로드 실패해도 시스템 폰트로 자연스럽게 대체) ---------- */
+      :root {
+        --font-body:
+          "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Malgun Gothic", "Apple SD Gothic Neo", Roboto, Arial, sans-serif;
+        --font-display: "Gowun Dodum", var(--font-body);
+      }
+
+      html {
+        font-family: var(--font-body);
+      }
+
+      h1,
+      h2,
+      .card_title,
+      .modal_title,
+      .footer_title {
+        font-family: var(--font-display);
+      }
+
+      /* ---------- 접근성: 스크린리더 전용(시각적으로는 숨김) ---------- */
+      .sr_only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* ---------- 접근성: 본문 바로가기 링크 (키보드 포커스 시에만 노출) ---------- */
+      .skip_link {
+        position: absolute;
+        top: -48px;
+        left: 8px;
+        background: #111111;
+        color: #ffffff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        z-index: 300;
+        transition: top 0.2s ease;
+      }
+
+      .skip_link:focus {
+        top: 8px;
+      }
+
+      /* ---------- 접근성: 모션 최소화 환경에서는 애니메이션/부드러운 스크롤 제거 ---------- */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+          scroll-behavior: auto !important;
+        }
       }
 
       /* ---------- 다크모드 색상 변수 추가---------- */
@@ -85,8 +184,20 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 20px;
+        padding: 10px 0;
         position: sticky;
+        top: 0;
+        z-index: 20;
+        background-color: color-mix(in srgb, var(--bg) 85%, transparent);
+        -webkit-backdrop-filter: blur(10px);
         backdrop-filter: blur(10px);
+      }
+
+      /* color-mix / backdrop-filter 미지원 구형 브라우저 대비 불투명 배경으로 대체 */
+      @supports not (backdrop-filter: blur(1px)) {
+        .toolbar {
+          background-color: var(--bg);
+        }
       }
 
       .category {
@@ -170,7 +281,32 @@
         right: 4px;
         width: 32px;
         height: 32px;
+        padding: 0;
+        border: none;
+        background: transparent;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .card_delete:focus-visible {
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
+      }
+
+      .card_delete img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      /* 카드 자체도 role="button"으로 키보드 포커스를 받으므로 포커스 링 표시 */
+      .card:focus-visible {
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
+        border-radius: 16px;
       }
 
       .thumbnail_img {
@@ -376,6 +512,162 @@
       @media (max-width: 779px) {
         .photo_grid {
           grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* ---------- 무드 리포트 탭 (커스텀 아이디어) ---------- */
+
+      .report_intro {
+        margin-top: 24px;
+        color: var(--muted-text);
+        font-size: 14px;
+      }
+
+      .report_stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .stat_card {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--surface-bg);
+      }
+
+      .stat_card .stat_label {
+        font-size: 13px;
+        color: var(--muted-text);
+      }
+
+      .stat_card .stat_value {
+        margin-top: 8px;
+        font-size: 28px;
+        font-weight: 700;
+        font-family: var(--font-display);
+      }
+
+      .stat_card .stat_value .unit {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--muted-text);
+        margin-left: 2px;
+      }
+
+      .report_section {
+        margin-top: 32px;
+      }
+
+      .report_section h2 {
+        font-size: 16px;
+        margin: 0 0 16px 0;
+      }
+
+      /* ---- 무드 분포 막대그래프 ---- */
+      .mood_bars {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .mood_bar_row {
+        display: grid;
+        grid-template-columns: 88px 1fr 44px;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+      }
+
+      .mood_bar_track {
+        height: 14px;
+        border-radius: 7px;
+        background: var(--muted-btn-bg);
+        overflow: hidden;
+      }
+
+      .mood_bar_fill {
+        height: 100%;
+        border-radius: 7px;
+        transition: width 0.4s ease;
+        min-width: 3px;
+      }
+
+      .mood_bar_count {
+        text-align: right;
+        color: var(--muted-text);
+      }
+
+      /* ---- 최근 12주 작성 활동 히트맵 (GitHub 잔디 스타일) ---- */
+      .heatmap_wrap {
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .heatmap {
+        display: grid;
+        grid-template-rows: repeat(7, 14px);
+        grid-auto-flow: column;
+        grid-auto-columns: 14px;
+        gap: 4px;
+        width: max-content;
+      }
+
+      .heat_cell {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        background: var(--muted-btn-bg);
+      }
+
+      .heat_cell[data-level="1"] {
+        background: #cdeaf9;
+      }
+      .heat_cell[data-level="2"] {
+        background: #7fc4e8;
+      }
+      .heat_cell[data-level="3"] {
+        background: #2f8fc4;
+      }
+
+      body.dark .heat_cell[data-level="1"] {
+        background: #163a4a;
+      }
+      body.dark .heat_cell[data-level="2"] {
+        background: #1f6087;
+      }
+      body.dark .heat_cell[data-level="3"] {
+        background: #3fa4dd;
+      }
+
+      .heatmap_legend {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--muted-text);
+      }
+
+      .heatmap_legend .heat_cell {
+        width: 12px;
+        height: 12px;
+      }
+
+      .report_empty {
+        margin-top: 40px;
+        text-align: center;
+        color: var(--muted-text);
+      }
+
+      @media (max-width: 779px) {
+        .report_stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .mood_bar_row {
+          grid-template-columns: 64px 1fr 36px;
         }
       }
 
@@ -671,82 +963,228 @@
   </head>
 
   <body>
+    <a class="skip_link" href="#main_content">본문 바로가기</a>
+
+    <noscript>
+      <div style="padding: 24px; text-align: center">
+        이 다이어리 앱은 자바스크립트가 있어야 정상적으로 동작해요. 브라우저
+        설정에서 자바스크립트를 켜주세요.
+      </div>
+    </noscript>
+
     <div class="container">
-      <div class="header">
+      <header class="header">
         <div class="header_top">
           <h1>용휘의 다이어리</h1>
           <label class="dark_toggle">
-            다크모드
-            <input type="checkbox" id="dark_mode_toggle" />
-            <span class="toggle_slider"></span>
+            <span>다크모드</span>
+            <input
+              type="checkbox"
+              id="dark_mode_toggle"
+              aria-label="다크모드 켜기/끄기"
+            />
+            <span class="toggle_slider" aria-hidden="true"></span>
           </label>
         </div>
 
         <div class="banner">
-          <img src="img/Rectangle 1.png" alt="배너 이미지" />
+          <img src="img/Rectangle 1.png" alt="다이어리 배너 이미지" />
         </div>
-      </div>
+      </header>
 
-      <div class="menu">
-        <div class="active_menu" id="menu_diary" data-menu="diary">
+      <nav class="menu" role="tablist" aria-label="다이어리 메뉴">
+        <button
+          type="button"
+          class="active_menu"
+          id="menu_diary"
+          data-menu="diary"
+          role="tab"
+          aria-selected="true"
+          aria-controls="diary_page"
+        >
           일기보관함
-        </div>
-        <div id="menu_photo" data-menu="photo">사진보관함</div>
-      </div>
+        </button>
+        <button
+          type="button"
+          id="menu_photo"
+          data-menu="photo"
+          role="tab"
+          aria-selected="false"
+          aria-controls="photo_page"
+          tabindex="-1"
+        >
+          사진보관함
+        </button>
+        <button
+          type="button"
+          id="menu_report"
+          data-menu="report"
+          role="tab"
+          aria-selected="false"
+          aria-controls="report_page"
+          tabindex="-1"
+        >
+          무드 리포트
+        </button>
+      </nav>
 
-      <!-- ---------- 일기보관함 화면 ---------- -->
-      <div id="diary_page">
-        <div class="toolbar">
-          <div class="left_toolbar">
-            <select class="category" id="category">
-              <option value="">전체</option>
-            </select>
+      <main id="main_content">
+        <!-- ---------- 일기보관함 화면 ---------- -->
+        <div id="diary_page" role="tabpanel" aria-labelledby="menu_diary">
+          <div class="toolbar">
+            <div class="left_toolbar">
+              <label class="sr_only" for="category">카테고리 필터</label>
+              <select class="category" id="category">
+                <option value="">전체</option>
+              </select>
 
-            <input
-              class="search"
-              type="text"
-              placeholder="검색어를 입력해주세요."
-            />
+              <label class="sr_only" for="search_input">일기 검색</label>
+              <input
+                class="search"
+                type="search"
+                id="search_input"
+                placeholder="검색어를 입력해주세요."
+              />
+            </div>
+            <button class="write_diary" id="write_diary_btn">
+              + 일기쓰기
+            </button>
           </div>
-          <button class="write_diary" id="write_diary_btn">+ 일기쓰기</button>
+
+          <div
+            class="diary_area"
+            id="diary_area"
+            aria-live="polite"
+            aria-busy="false"
+          ></div>
+
+          <div class="page_info" id="page_info" aria-live="polite"></div>
+          <nav class="pagenation" id="pagination" aria-label="페이지 이동"></nav>
         </div>
 
-        <div class="diary_area" id="diary_area"></div>
+        <!-- ---------- 사진보관함 화면 (강아지 사진) ---------- -->
+        <div
+          id="photo_page"
+          role="tabpanel"
+          aria-labelledby="menu_photo"
+          style="display: none"
+        >
+          <div class="ratio_filter" role="group" aria-label="사진 비율 선택">
+            <button
+              class="ratio_btn active"
+              data-ratio="1-1"
+              aria-pressed="true"
+            >
+              기본형 1:1
+            </button>
+            <button class="ratio_btn" data-ratio="4-3" aria-pressed="false">
+              가로형 4:3
+            </button>
+            <button class="ratio_btn" data-ratio="3-4" aria-pressed="false">
+              세로형 3:4
+            </button>
+          </div>
 
-        <div class="page_info" id="page_info"></div>
-        <div class="pagenation" id="pagination"></div>
-      </div>
-
-      <!-- ---------- 사진보관함 화면 (강아지 사진) ---------- -->
-      <div id="photo_page" style="display: none">
-        <div class="ratio_filter">
-          <button class="ratio_btn active" data-ratio="1-1">기본형 1:1</button>
-          <button class="ratio_btn" data-ratio="4-3">가로형 4:3</button>
-          <button class="ratio_btn" data-ratio="3-4">세로형 3:4</button>
+          <div
+            class="photo_grid ratio-1-1"
+            id="photo_grid"
+            aria-label="랜덤 강아지 사진 목록"
+          ></div>
         </div>
 
-        <div class="photo_grid ratio-1-1" id="photo_grid"></div>
-      </div>
+        <!-- ---------- 무드 리포트 화면 (커스텀 탭) ---------- -->
+        <div
+          id="report_page"
+          role="tabpanel"
+          aria-labelledby="menu_report"
+          style="display: none"
+        >
+          <p class="report_intro">
+            지금까지 쓴 일기를 바탕으로 나의 기분 흐름을 한눈에 정리했어요.
+          </p>
+
+          <div id="report_body">
+            <div class="report_stats">
+              <div class="stat_card">
+                <div class="stat_label">총 작성 일기</div>
+                <div class="stat_value" id="stat_total">
+                  0<span class="unit">개</span>
+                </div>
+              </div>
+              <div class="stat_card">
+                <div class="stat_label">이번 달 작성</div>
+                <div class="stat_value" id="stat_month">
+                  0<span class="unit">개</span>
+                </div>
+              </div>
+              <div class="stat_card">
+                <div class="stat_label">연속 작성일</div>
+                <div class="stat_value" id="stat_streak">
+                  0<span class="unit">일</span>
+                </div>
+              </div>
+              <div class="stat_card">
+                <div class="stat_label">가장 많은 기분</div>
+                <div class="stat_value" id="stat_top_mood">-</div>
+              </div>
+            </div>
+
+            <div class="report_section">
+              <h2>기분 분포</h2>
+              <div class="mood_bars" id="mood_bars"></div>
+            </div>
+
+            <div class="report_section">
+              <h2>최근 12주 작성 활동</h2>
+              <div class="heatmap_wrap">
+                <div
+                  class="heatmap"
+                  id="report_heatmap"
+                  role="img"
+                  aria-label="최근 12주간 일기 작성 활동을 요일별로 표시한 히트맵"
+                ></div>
+              </div>
+              <div class="heatmap_legend" aria-hidden="true">
+                <span>적음</span>
+                <span class="heat_cell" data-level="0"></span>
+                <span class="heat_cell" data-level="1"></span>
+                <span class="heat_cell" data-level="2"></span>
+                <span class="heat_cell" data-level="3"></span>
+                <span>많음</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="report_empty" id="report_empty" hidden>
+            아직 작성된 일기가 없어요. 일기를 먼저 써보면 리포트가 채워져요!
+          </p>
+        </div>
+      </main>
     </div>
 
     <!-- 푸터 구역 -->
 
-    <div class="footer">
+    <footer class="footer">
       <div class="footer_content">
         <h2 class="footer_title">용휘의 다이어리</h2>
         <div>대표 : 김용휘</div>
         <div>Copyright © 2024. {name} Co., Ltd</div>
       </div>
-    </div>
+    </footer>
 
     <!-- ---------- 모달 1: 일기 작성 ---------- -->
 
-    <div class="modal_overlay" id="write_overlay" style="display: none">
+    <div
+      class="modal_overlay"
+      id="write_overlay"
+      style="display: none"
+      aria-labelledby="write_modal_title"
+    >
       <div class="modal">
-        <h2 class="modal_title">일기 쓰기</h2>
+        <h2 class="modal_title" id="write_modal_title">일기 쓰기</h2>
 
-        <div class="modal_field">
-          <label class="modal_label">오늘 기분은 어떠셨나요?</label>
+        <div class="modal_field" role="group" aria-labelledby="mood_group_label">
+          <span class="modal_label" id="mood_group_label">오늘 기분은 어떠셨나요?</span>
 
           <div class="modal_options">
             <label class="mood_option">
@@ -769,7 +1207,7 @@
         </div>
 
         <div class="modal_field">
-          <label class="modal_label">제목</label>
+          <label class="modal_label" for="title_input">제목</label>
           <input
             type="text"
             id="title_input"
@@ -779,7 +1217,7 @@
         </div>
 
         <div class="modal_field">
-          <label class="modal_label">내용</label>
+          <label class="modal_label" for="content_input">내용</label>
           <textarea
             id="content_input"
             class="modal_textarea"
@@ -802,9 +1240,12 @@
       class="modal_overlay nested"
       id="success_overlay"
       style="display: none"
+      aria-labelledby="success_modal_text"
     >
       <div class="modal">
-        <p class="modal_center_text">등록이 완료되었습니다.</p>
+        <p class="modal_center_text" id="success_modal_text">
+          등록이 완료되었습니다.
+        </p>
         <div class="modal_actions" style="justify-content: center">
           <button class="modal_submit_btn" id="success_confirm_btn">
             확인
@@ -815,7 +1256,12 @@
 
     <!-- ---------- 모달 3: 일기 상세 ---------- -->
 
-    <div class="modal_overlay" id="detail_overlay" style="display: none">
+    <div
+      class="modal_overlay"
+      id="detail_overlay"
+      style="display: none"
+      aria-labelledby="detail_title"
+    >
       <div class="modal">
         <h2 class="modal_title" id="detail_title"></h2>
         <div class="card_lower" style="margin-bottom: 12px">
@@ -840,9 +1286,12 @@
       class="modal_overlay nested"
       id="delete_confirm_overlay"
       style="display: none"
+      aria-labelledby="delete_modal_text"
     >
       <div class="modal">
-        <p class="modal_center_text">정말 삭제하시겠어요?</p>
+        <p class="modal_center_text" id="delete_modal_text">
+          정말 삭제하시겠어요?
+        </p>
         <div class="modal_actions" style="justify-content: center">
           <button class="modal_secondary_btn" id="delete_cancel_btn">
             취소
@@ -852,10 +1301,18 @@
       </div>
     </div>
 
-    <button id="scroll_top_btn" class="scroll_top_btn">⬆️</button>
+    <button
+      id="scroll_top_btn"
+      type="button"
+      class="scroll_top_btn"
+      aria-label="맨 위로 이동"
+      style="display: none"
+    >
+      <span aria-hidden="true">⬆️</span>
+    </button>
 
     <!-- ---------- 토스트 ---------- -->
-    <div id="toast" class="toast">복사되었습니다.</div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
       // =========================================================
@@ -866,6 +1323,11 @@
       // =========================================================
 
       let openModalStack = [];
+      let lastFocusedEl = null; // 모달을 연 트리거 엘리먼트 (닫을 때 포커스 복귀용)
+
+      // 모달 안에서 포커스 가능한 요소들 (포커스 트랩용)
+      const FOCUSABLE_SELECTOR =
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
       function openModal(overlayEl) {
         if (openModalStack.length === 0) {
@@ -873,15 +1335,47 @@
           window.scrollTo({ top: 0, behavior: "instant" });
           document.body.style.overflow = "hidden";
         }
+
+        // 트리거 엘리먼트가 별도로 지정 안 됐으면(=ESC 등) 현재 포커스를 기억
+        if (!lastFocusedEl) lastFocusedEl = document.activeElement;
+
         overlayEl.style.display = "flex";
+        overlayEl.setAttribute("role", "dialog");
+        overlayEl.setAttribute("aria-modal", "true");
         openModalStack.push(overlayEl);
+
+        // 접근성: 모달이 열리면 내부 첫 번째 포커스 가능한 요소로 이동
+        const modal = overlayEl.querySelector(".modal");
+        const focusable = modal
+          ? modal.querySelectorAll(FOCUSABLE_SELECTOR)
+          : [];
+        if (focusable.length > 0) {
+          focusable[0].focus();
+        } else if (modal) {
+          modal.setAttribute("tabindex", "-1");
+          modal.focus();
+        }
       }
 
       function closeModal(overlayEl) {
         overlayEl.style.display = "none";
         openModalStack = openModalStack.filter((m) => m !== overlayEl);
+
         if (openModalStack.length === 0) {
           document.body.style.overflow = "";
+          // 포커스를 모달을 열었던 트리거로 되돌려 키보드/스크린리더 흐름을 유지
+          if (lastFocusedEl && typeof lastFocusedEl.focus === "function") {
+            lastFocusedEl.focus();
+          }
+          lastFocusedEl = null;
+        } else {
+          // 중첩 모달이 닫히면 아래에 남은 모달로 포커스 복귀
+          const modal =
+            openModalStack[openModalStack.length - 1].querySelector(
+              ".modal",
+            );
+          const focusable = modal?.querySelectorAll(FOCUSABLE_SELECTOR);
+          if (focusable && focusable.length > 0) focusable[0].focus();
         }
       }
 
@@ -892,9 +1386,34 @@
       }
 
       // ESC : 스택 맨 위(가장 최근에 연) 모달부터 닫기
+      // Tab/Shift+Tab : 맨 위 모달 안에서만 포커스가 순환하도록 트랩
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && openModalStack.length > 0) {
-          closeModal(openModalStack[openModalStack.length - 1]);
+        if (openModalStack.length === 0) return;
+        const topOverlay = openModalStack[openModalStack.length - 1];
+
+        if (e.key === "Escape") {
+          closeModal(topOverlay);
+          return;
+        }
+
+        if (e.key === "Tab") {
+          const modal = topOverlay.querySelector(".modal");
+          if (!modal) return;
+          const focusable = Array.from(
+            modal.querySelectorAll(FOCUSABLE_SELECTOR),
+          );
+          if (focusable.length === 0) return;
+
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
         }
       });
 
@@ -1057,10 +1576,22 @@
           .map((d) => {
             const mood = MOOD_CONFIG[d.mood];
             return `
-        <div class="card" data-diary-id="${d.id}">
+        <div
+          class="card"
+          data-diary-id="${d.id}"
+          role="button"
+          tabindex="0"
+          aria-label="${d.title} 일기 상세보기 (${mood.label}, ${d.date})"
+        >
           <div class="card_thumbnail" style="background-color:${mood.color}">
-            <img src="${mood.image}" class="thumbnail_img" alt="${mood.label}" />
-            <img src="img/close_outline_light_m.svg" alt="x" class="card_delete" />
+            <img src="${mood.image}" class="thumbnail_img" alt="" />
+            <button
+              type="button"
+              class="card_delete"
+              aria-label="${d.title} 일기 삭제"
+            >
+              <img src="img/close_outline_light_m.svg" alt="" aria-hidden="true" />
+            </button>
           </div>
           <div class="card_lower">
             <span class="tag" style="color:${mood.color}">${mood.label}</span>
@@ -1154,9 +1685,12 @@
         if (openModalStack.length > 0) return;
         if (document.getElementById("photo_page").style.display !== "none")
           return;
+        if (document.getElementById("report_page").style.display !== "none")
+          return;
 
         const tag = document.activeElement.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (document.activeElement.closest(".menu")) return; // 탭 목록 안에서는 탭 이동용 화살표와 충돌하지 않도록 제외
 
         goToPage(currentPage + (e.key === "ArrowRight" ? 1 : -1));
       });
@@ -1193,18 +1727,54 @@
       writeBtn.addEventListener("click", () => openModal(writeOverlay));
       writeCloseBtn.addEventListener("click", () => closeModal(writeOverlay));
 
-      // ---- 다크모드 토글: 메인 화면 전체(body)에 .dark 클래스로 반영 ----
+      // ---- 다크모드: 저장된 선택 > OS 설정(prefers-color-scheme) > 기본(라이트) 순으로 초기값 결정 ----
+      const DARK_MODE_KEY = "dark_mode";
+
+      function applyDarkMode(isDark) {
+        document.body.classList.toggle("dark", isDark);
+        darkModeToggle.checked = isDark;
+      }
+
+      (function initDarkMode() {
+        const saved = localStorage.getItem(DARK_MODE_KEY);
+        if (saved === "true" || saved === "false") {
+          applyDarkMode(saved === "true");
+          return;
+        }
+        // 사용자가 직접 고른 적이 없으면 OS/브라우저의 다크모드 설정을 따름
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        applyDarkMode(prefersDark);
+      })();
+
       darkModeToggle.addEventListener("change", () => {
-        document.body.classList.toggle("dark", darkModeToggle.checked);
+        applyDarkMode(darkModeToggle.checked);
+        localStorage.setItem(DARK_MODE_KEY, String(darkModeToggle.checked));
       });
 
+      // 사용자가 직접 고른 적이 없는 상태에서 OS 설정이 바뀌면 실시간으로 반영
+      if (window.matchMedia) {
+        window
+          .matchMedia("(prefers-color-scheme: dark)")
+          .addEventListener("change", (e) => {
+            if (localStorage.getItem(DARK_MODE_KEY) === null) {
+              applyDarkMode(e.matches);
+            }
+          });
+      }
+
       function addDiary(mood, title, content) {
+        const now = new Date();
         diaries.push({
           id: Date.now(),
           mood,
           title,
           content,
-          date: new Date().toLocaleDateString("ko-KR"),
+          date: now.toLocaleDateString("ko-KR"),
+          // 무드 리포트 통계용 ISO 날짜(YYYY-MM-DD)도 함께 저장
+          // (표시용 date는 로케일 문자열이라 브라우저마다 파싱이 불안정하기 때문)
+          iso: now.toISOString().slice(0, 10),
         });
         saveDiaries();
         currentPage = 1; // 최신순이므로 새 일기는 1페이지에 있음
@@ -1241,15 +1811,17 @@
       // 6. 일기 상세 / 복사 / 삭제
       // =========================================================
 
-      document.getElementById("diary_area").addEventListener("click", (e) => {
-        const card = e.target.closest(".card");
+      // 카드 클릭/삭제 로직 (마우스 클릭 + 키보드 Enter/Space 공용으로 사용)
+      function handleDiaryAreaActivate(target) {
+        const card = target.closest(".card");
         if (!card) return;
 
         const id = Number(card.dataset.diaryId);
 
-        // 카드의 x 아이콘 클릭 → 바로 삭제 확인 모달로 (상세 안 거침)
-        if (e.target.classList.contains("card_delete")) {
+        // x 버튼(또는 그 안의 아이콘) 클릭 → 바로 삭제 확인 모달로 (상세 안 거침)
+        if (target.closest(".card_delete")) {
           currentDetailId = id;
+          lastFocusedEl = target.closest(".card_delete");
           openModal(deleteConfirmOverlay);
           return;
         }
@@ -1267,8 +1839,24 @@
         document.getElementById("detail_content").textContent =
           diary.content || "(내용 없음)";
 
+        lastFocusedEl = card;
         openModal(detailOverlay);
+      }
+
+      document.getElementById("diary_area").addEventListener("click", (e) => {
+        handleDiaryAreaActivate(e.target);
       });
+
+      // 키보드 접근성: role="button"인 카드도 Enter/Space로 동일하게 동작
+      document
+        .getElementById("diary_area")
+        .addEventListener("keydown", (e) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          const card = e.target.closest(".card");
+          if (!card) return;
+          e.preventDefault(); // 스페이스바의 기본 스크롤 동작 방지
+          handleDiaryAreaActivate(e.target);
+        });
 
       detailCloseBtn.addEventListener("click", () => {
         closeModal(detailOverlay);
@@ -1329,31 +1917,73 @@
       // 7. 일기보관함 / 사진보관함 탭 전환
       // =========================================================
 
-      const menuDiary = document.getElementById("menu_diary");
-      const menuPhoto = document.getElementById("menu_photo");
-      const diaryPage = document.getElementById("diary_page");
-      const photoPage = document.getElementById("photo_page");
+      // 탭 3종 (일기보관함 / 사진보관함 / 무드 리포트) 공용 설정
+      const TABS = [
+        { key: "diary", menuId: "menu_diary", pageId: "diary_page" },
+        { key: "photo", menuId: "menu_photo", pageId: "photo_page" },
+        { key: "report", menuId: "menu_report", pageId: "report_page" },
+      ];
+
+      const tabEntries = TABS.map((t) => ({
+        ...t,
+        menuEl: document.getElementById(t.menuId),
+        pageEl: document.getElementById(t.pageId),
+      }));
 
       let dogPhotosLoaded = false; // 최초 1회만 fetch (탭 왔다갔다 할 때마다 다시 부르지 않도록)
 
       function switchMenu(target) {
-        const isDiary = target === "diary";
+        tabEntries.forEach((tab) => {
+          const isActive = tab.key === target;
 
-        menuDiary.classList.toggle("active_menu", isDiary);
-        menuPhoto.classList.toggle("active_menu", !isDiary);
+          tab.menuEl.classList.toggle("active_menu", isActive);
+          tab.menuEl.setAttribute("aria-selected", String(isActive));
+          // 로빙 tabindex: 활성 탭만 Tab 키로 포커스되게, 나머지는 화살표로만 이동
+          tab.menuEl.setAttribute("tabindex", isActive ? "0" : "-1");
 
-        diaryPage.style.display = isDiary ? "" : "none";
-        photoPage.style.display = isDiary ? "none" : "";
+          tab.pageEl.style.display = isActive ? "" : "none";
+        });
 
         // 사진보관함 탭에 처음 들어올 때만 강아지 사진을 불러옴
-        if (!isDiary && !dogPhotosLoaded) {
+        if (target === "photo" && !dogPhotosLoaded) {
           dogPhotosLoaded = true;
           renderPhotoGrid();
         }
+
+        // 리포트 탭은 값이 자주 바뀌므로(일기 등록/삭제) 들어올 때마다 새로 계산
+        if (target === "report") {
+          renderReport();
+        }
       }
 
-      menuDiary.addEventListener("click", () => switchMenu("diary"));
-      menuPhoto.addEventListener("click", () => switchMenu("photo"));
+      tabEntries.forEach((tab) => {
+        tab.menuEl.addEventListener("click", () => switchMenu(tab.key));
+      });
+
+      // 접근성: WAI-ARIA 탭 패턴 - 좌/우/Home/End 화살표로 탭 간 이동 + 자동 활성화
+      document.querySelector(".menu").addEventListener("keydown", (e) => {
+        const currentIndex = tabEntries.findIndex(
+          (t) => t.menuEl === document.activeElement,
+        );
+        if (currentIndex === -1) return;
+
+        let nextIndex = null;
+        if (e.key === "ArrowRight") {
+          nextIndex = (currentIndex + 1) % tabEntries.length;
+        } else if (e.key === "ArrowLeft") {
+          nextIndex =
+            (currentIndex - 1 + tabEntries.length) % tabEntries.length;
+        } else if (e.key === "Home") {
+          nextIndex = 0;
+        } else if (e.key === "End") {
+          nextIndex = tabEntries.length - 1;
+        }
+
+        if (nextIndex === null) return;
+        e.preventDefault();
+        tabEntries[nextIndex].menuEl.focus();
+        switchMenu(tabEntries[nextIndex].key);
+      });
 
       // =========================================================
       // 8. 사진보관함 - 강아지 사진 (fetch + 컴포넌트 + 스켈레톤 + 비율필터)
@@ -1475,10 +2105,12 @@
       // ---- 8-4. 비율 필터 버튼 ----
       document.querySelectorAll(".ratio_btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".ratio_btn")
-            .forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".ratio_btn").forEach((b) => {
+            b.classList.remove("active");
+            b.setAttribute("aria-pressed", "false");
+          });
           btn.classList.add("active");
+          btn.setAttribute("aria-pressed", "true");
 
           const grid = document.getElementById("photo_grid");
           // 클래스만 교체 -> 이미지는 그대로 두고 CSS aspect-ratio만 바뀜 (재요청 없음)
@@ -1487,7 +2119,127 @@
       });
 
       // =========================================================
-      // 9. 맨 위로 버튼
+      // 9. 무드 리포트 (커스텀 탭) - 요약 통계 / 기분 분포 / 활동 히트맵
+      //    ※ 외부 API 없이 localStorage의 diaries 데이터만으로 계산 (오프라인에서도 동작)
+      // =========================================================
+
+      // 레거시 데이터 대비: iso 필드가 없는 예전 일기는 "YYYY. M. D." 형태의
+      // date 문자열에서 정규식으로 역산 (Safari 등에서 Date 파싱이 불안정하기 때문에
+      // new Date(diary.date)로 바로 파싱하지 않음)
+      function toISODate(diary) {
+        if (diary.iso) return diary.iso;
+        const match = diary.date && diary.date.match(/(\d+)\D+(\d+)\D+(\d+)/);
+        if (!match) return null;
+        const [, y, m, d] = match;
+        return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+      }
+
+      function renderReport() {
+        const emptyEl = document.getElementById("report_empty");
+        const bodyEl = document.getElementById("report_body");
+
+        // 엣지케이스: 일기가 하나도 없으면 빈 상태 안내만 보여주고 계산은 건너뜀
+        if (diaries.length === 0) {
+          emptyEl.hidden = false;
+          bodyEl.style.display = "none";
+          return;
+        }
+        emptyEl.hidden = true;
+        bodyEl.style.display = "";
+
+        const todayISO = new Date().toISOString().slice(0, 10);
+        const thisMonthPrefix = todayISO.slice(0, 7); // "YYYY-MM"
+        const isoList = diaries.map(toISODate).filter(Boolean);
+
+        // ---- 9-1. 총 작성 수 / 이번 달 작성 수 ----
+        const monthCount = isoList.filter((iso) =>
+          iso.startsWith(thisMonthPrefix),
+        ).length;
+
+        document.getElementById("stat_total").innerHTML =
+          `${diaries.length}<span class="unit">개</span>`;
+        document.getElementById("stat_month").innerHTML =
+          `${monthCount}<span class="unit">개</span>`;
+
+        // ---- 9-2. 연속 작성일(streak) ----
+        // 오늘부터 거슬러 올라가며 하루도 안 빼먹은 날 수를 셈.
+        // 오늘 일기를 아직 안 썼어도 어제까지는 연속이었을 수 있으니 그 경우 어제부터 계산.
+        const writtenDates = new Set(isoList);
+        let streak = 0;
+        const cursor = new Date();
+        if (!writtenDates.has(todayISO)) cursor.setDate(cursor.getDate() - 1);
+        while (writtenDates.has(cursor.toISOString().slice(0, 10))) {
+          streak += 1;
+          cursor.setDate(cursor.getDate() - 1);
+        }
+        document.getElementById("stat_streak").innerHTML =
+          `${streak}<span class="unit">일</span>`;
+
+        // ---- 9-3. 기분별 분포 막대그래프 + 최다 기분 ----
+        const moodCounts = {};
+        Object.keys(MOOD_CONFIG).forEach((key) => (moodCounts[key] = 0));
+        diaries.forEach((d) => {
+          if (moodCounts[d.mood] !== undefined) moodCounts[d.mood] += 1;
+        });
+
+        const topEntry = Object.entries(moodCounts).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
+        document.getElementById("stat_top_mood").textContent =
+          topEntry && topEntry[1] > 0 ? MOOD_CONFIG[topEntry[0]].label : "-";
+
+        const maxCount = Math.max(1, ...Object.values(moodCounts)); // 0으로 나누기 방지
+        document.getElementById("mood_bars").innerHTML = Object.entries(
+          moodCounts,
+        )
+          .map(([key, count]) => {
+            const cfg = MOOD_CONFIG[key];
+            const pct = Math.round((count / maxCount) * 100);
+            return `
+        <div class="mood_bar_row">
+          <span>${cfg.label}</span>
+          <span class="mood_bar_track">
+            <span class="mood_bar_fill" style="width:${pct}%; background:${cfg.color};"></span>
+          </span>
+          <span class="mood_bar_count">${count}개</span>
+        </div>
+          `;
+          })
+          .join("");
+
+        // ---- 9-4. 최근 12주 활동 히트맵 (일~토 7행 x 12열, GitHub 잔디 스타일) ----
+        const countByDate = {};
+        isoList.forEach((iso) => {
+          countByDate[iso] = (countByDate[iso] || 0) + 1;
+        });
+
+        const WEEKS = 12;
+        const today = new Date();
+        // 이번 주 토요일에 맞춰 끝을 정렬 (요일 인덱스만큼 보정)
+        const endDate = new Date(today);
+        endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+        const startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - (WEEKS * 7 - 1)); // 정확히 일요일에 정렬됨
+
+        let heatmapHtml = "";
+        const cursorDate = new Date(startDate);
+        while (cursorDate <= endDate) {
+          const iso = cursorDate.toISOString().slice(0, 10);
+          const isFuture = cursorDate > today;
+          const count = countByDate[iso] || 0;
+          const level = count === 0 ? 0 : count === 1 ? 1 : count === 2 ? 2 : 3;
+
+          heatmapHtml += `<div class="heat_cell" data-level="${
+            isFuture ? 0 : level
+          }" title="${iso}${isFuture ? "" : " · " + count + "개"}"></div>`;
+
+          cursorDate.setDate(cursorDate.getDate() + 1);
+        }
+        document.getElementById("report_heatmap").innerHTML = heatmapHtml;
+      }
+
+      // =========================================================
+      // 10. 맨 위로 버튼
       // =========================================================
 
       const scrollTopBtn = document.getElementById("scroll_top_btn");
