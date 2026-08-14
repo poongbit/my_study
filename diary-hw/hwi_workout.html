@@ -453,6 +453,36 @@
         justify-content: center;
       }
 
+      /* 운동 카드 상세보기 모달 안의 내용이에요. */
+      .상세날짜 {
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: #888888;
+      }
+
+      .상세메모 {
+        margin: 16px 0;
+        padding: 12px;
+        border-radius: 10px;
+        background-color: #f6f6f6;
+        font-size: 13px;
+      }
+
+      .상세종목 {
+        padding: 14px 0;
+        border-top: 1px solid #eeeeee;
+      }
+
+      .상세종목이름 {
+        font-weight: bold;
+      }
+
+      .상세종목설명 {
+        margin-top: 6px;
+        color: #777777;
+        font-size: 13px;
+      }
+
       .입력묶음 {
         margin-bottom: 16px;
       }
@@ -549,8 +579,18 @@
         color: #bbbbbb;
       }
 
-      .다크모드 .종목한줄 {
+      .다크모드 .종목한줄,
+      .다크모드 .상세종목 {
         border-top-color: #444444;
+      }
+
+      .다크모드 .상세메모 {
+        background-color: #333333;
+      }
+
+      .다크모드 .상세날짜,
+      .다크모드 .상세종목설명 {
+        color: #bbbbbb;
       }
 
       /* 모바일 화면에서는 한 줄씩 보여 줘요. */
@@ -728,8 +768,9 @@
                         <div>
                             <div class="종목이름">${운동.종목} · ${운동.부위}</div>
                             <div class="종목설명">${운동설명만들기(운동)}</div>
+                            ${운동.메모 ? `<div class="종목설명">메모 · ${운동.메모}</div>` : ""}
                         </div>
-                        <button class="종목삭제버튼" onclick="종목삭제하기(${하루.번호}, ${순서})">삭제</button>
+                        <button class="종목삭제버튼" onclick="event.stopPropagation(); 종목삭제하기(${하루.번호}, ${순서})">삭제</button>
                     </div>
                 `;
         });
@@ -738,10 +779,10 @@
           하루.메모 === "" ? "" : `<div class="하루메모">${하루.메모}</div>`;
 
         return `
-                <div class="운동카드">
+                <div class="운동카드" onclick="상세보기열기(${하루.번호})">
                     <div class="카드상단">
                         <div class="날짜">${하루.날짜}</div>
-                        <button class="하루삭제버튼" onclick="하루삭제하기(${하루.번호})">×</button>
+                        <button class="하루삭제버튼" onclick="event.stopPropagation(); 하루삭제하기(${하루.번호})">×</button>
                     </div>
                     ${메모HTML}
                     ${종목HTML}
@@ -798,6 +839,45 @@
           입력한검색어 = 검색어;
           운동검색하기();
         }, 500);
+      }
+
+      /* 운동 카드를 클릭하면 그 날짜의 상세 내용을 보여 줘요. */
+      function 상세보기열기(번호) {
+        const 하루 = 운동일지.find(function (기록) {
+          return 기록.번호 === 번호;
+        });
+
+        if (하루 === undefined) return;
+
+        document.getElementById("상세날짜").innerText = 하루.날짜;
+
+        if (하루.메모 === "") {
+          document.getElementById("상세메모").style.display = "none";
+        } else {
+          document.getElementById("상세메모").style.display = "block";
+          document.getElementById("상세메모").innerText = 하루.메모;
+        }
+
+        let 운동HTML = "";
+
+        하루.운동목록.map(function (운동, 순서) {
+          운동HTML = 운동HTML + `
+            <div class="상세종목">
+              <div class="상세종목이름">${순서 + 1}. ${운동.종목} · ${운동.부위}</div>
+              <div class="상세종목설명">${운동설명만들기(운동)}</div>
+              ${운동.메모 ? `<div class="상세종목설명">메모 · ${운동.메모}</div>` : ""}
+            </div>
+          `;
+        });
+
+        document.getElementById("상세운동목록").innerHTML = 운동HTML;
+        document.getElementById("상세보기모달").style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function 상세보기닫기() {
+        document.getElementById("상세보기모달").style.display = "none";
+        document.body.style.overflow = "";
       }
 
       /* 운동 등록 모달을 열어요. */
@@ -863,6 +943,7 @@
           횟수: Number(document.getElementById("횟수입력").value) || 0,
           시간: Number(document.getElementById("시간입력").value) || 0,
           거리: Number(document.getElementById("거리입력").value) || 0,
+          메모: 메모,
         };
 
         /* 같은 날짜가 있으면 새 카드를 만들지 않고 그 날짜에 운동을 추가해요. */
@@ -874,14 +955,13 @@
           같은날짜 = {
             번호: new Date().getTime(),
             날짜: 날짜,
-            메모: 메모,
+            메모: "",
             운동목록: [],
           };
           운동일지.push(같은날짜);
         }
 
         같은날짜.운동목록.push(새운동);
-        if (메모 !== "") 같은날짜.메모 = 메모;
 
         운동저장하기();
         운동검색하기();
@@ -1180,6 +1260,11 @@
 
         if (document.getElementById("운동등록모달").style.display === "flex") {
           모달닫기();
+          return;
+        }
+
+        if (document.getElementById("상세보기모달").style.display === "flex") {
+          상세보기닫기();
         }
       });
 
@@ -1388,6 +1473,21 @@
       </div>
     </div>
 
+    <!-- 운동 기록 상세보기 모달 -->
+    <div class="모달배경" id="상세보기모달" onclick="상세보기닫기()">
+      <div class="모달" onclick="event.stopPropagation()">
+        <h2 class="모달제목">운동 상세 기록</h2>
+        <div class="상세날짜" id="상세날짜"></div>
+
+        <div class="상세메모" id="상세메모"></div>
+        <div id="상세운동목록"></div>
+
+        <div class="모달버튼영역" style="margin-top: 20px">
+          <button class="등록하기버튼" onclick="상세보기닫기()">확인</button>
+        </div>
+      </div>
+    </div>
+
     <div class="모달배경" id="운동등록모달" onclick="모달닫기()">
       <div class="모달" onclick="event.stopPropagation()">
         <h2 class="모달제목">운동 기록하기</h2>
@@ -1491,7 +1591,7 @@
         </div>
 
         <div class="입력묶음">
-          <div class="입력라벨">오늘 메모 (선택)</div>
+          <div class="입력라벨">운동 메모 (선택)</div>
           <textarea
             class="메모입력"
             id="메모입력"
